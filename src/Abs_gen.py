@@ -11,3 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from hapi import *
 
+# Impor the variables from the Variables.py script
+from Variables import args
+from Variables import args_dict
+# Functions

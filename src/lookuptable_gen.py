@@ -11,3 +11,7 @@ import matplotlib.pyplot as plt
 from hapi import *
 
 #from Abs_gen import Absorption
+
+# Importing the variables from the Variables.py script
+from Variables import args
+from Variables import args_dict
