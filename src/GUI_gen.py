@@ -1,14 +1,15 @@
 """
 This script generates the GUI for the generation of spectra data, lookuptables and fitting of the experimental data
 There is a tab for each of the three functionalities
-It uses the pyqt6 library to generate the GUI
+It uses the pyqt5 library to generate the GUI
 """
 # Libraries
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QComboBox, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTabWidget, QLabel, QLineEdit, QPushButton
+
 # Importing the variables from the Variables.py script
-from Variables import args
-from Variables import args_dict
+# from Variables import args
+# from Variables import args_dict
 
 class GUI(QMainWindow):
     def __init__(self):
@@ -51,10 +52,29 @@ class GUI(QMainWindow):
         layout.addWidget(self.molecule_input)
 
         self.generate_button = QPushButton("Generate Absorption Spectra")
-        self.generate_button.clicked.connect() # connect to the function that 
-        # generates the absorption spectra
+        self.generate_button.clicked.connect(self.generate_absorption_spectra)
         layout.addWidget(self.generate_button)
 
         self.absorption_tab.setLayout(layout)
 
+    def init_fitting_tab(self):
+        layout = QVBoxLayout()
+        label = QLabel("Fitting Data functionality will be here.")
+        layout.addWidget(label)
+        self.fitting_tab.setLayout(layout)
 
+    def init_lookuptable_tab(self):
+        layout = QVBoxLayout()
+        label = QLabel("Lookuptable Generation functionality will be here.")
+        layout.addWidget(label)
+        self.lookuptable_tab.setLayout(layout)
+
+    def generate_absorption_spectra(self):
+        # Your code to generate absorption spectra goes here
+        print("Generating absorption spectra...")
+
+# Run the application
+app = QApplication(sys.argv)
+window = GUI()
+window.show()
+sys.exit(app.exec_())
