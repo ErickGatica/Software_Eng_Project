@@ -5,7 +5,7 @@ It uses the pyqt5 library to generate the GUI
 """
 # Libraries
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTabWidget, QLabel, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTabWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox
 
 # Importing the variables from the Variables.py script
 # from Variables import args
@@ -36,30 +36,41 @@ class GUI(QMainWindow):
     def init_absorption_tab(self):
         layout = QVBoxLayout()
 
-        self.temp_label = QLabel("Temperature (K):")
+        temp_layout = QHBoxLayout()
         self.temp_input = QLineEdit()
-        layout.addWidget(self.temp_label)
-        layout.addWidget(self.temp_input)
+        self.temp_label = QLabel("Temperature (K)")
+        temp_layout.addWidget(self.temp_input)
+        temp_layout.addWidget(self.temp_label)
+        layout.addLayout(temp_layout)
 
-        self.pressure_label = QLabel("Pressure (atm):")
+        pressure_layout = QHBoxLayout()
         self.pressure_input = QLineEdit()
-        layout.addWidget(self.pressure_label)
-        layout.addWidget(self.pressure_input)
+        self.pressure_label = QLabel("Pressure (atm)")
+        pressure_layout.addWidget(self.pressure_input)
+        pressure_layout.addWidget(self.pressure_label)
+        layout.addLayout(pressure_layout)
 
-        self.wavenumber_min_label = QLabel("Minimum Wavenumber (cm-1):")
+        wavenumber_min_layout = QHBoxLayout()
         self.wavenumber_min_input = QLineEdit()
-        layout.addWidget(self.wavenumber_min_label)
-        layout.addWidget(self.wavenumber_min_input)
+        self.wavenumber_min_label = QLabel("Minimum Wavenumber (cm-1)")
+        wavenumber_min_layout.addWidget(self.wavenumber_min_input)
+        wavenumber_min_layout.addWidget(self.wavenumber_min_label)
+        layout.addLayout(wavenumber_min_layout)
 
-        self.wavenumber_max_label = QLabel("Maximum Wavenumber (cm-1):")
+        wavenumber_max_layout = QHBoxLayout()
         self.wavenumber_max_input = QLineEdit()
-        layout.addWidget(self.wavenumber_max_label)
-        layout.addWidget(self.wavenumber_max_input)
+        self.wavenumber_max_label = QLabel("Maximum Wavenumber (cm-1)")
+        wavenumber_max_layout.addWidget(self.wavenumber_max_input)
+        wavenumber_max_layout.addWidget(self.wavenumber_max_label)
+        layout.addLayout(wavenumber_max_layout)
 
+        molecule_layout = QHBoxLayout()
+        self.molecule_input = QComboBox()
+        self.molecule_input.addItems(["H2O", "CO2", "CO", "N2", "O2", "CH4", "H2", "NO", "NO2"])
         self.molecule_label = QLabel("Molecule:")
-        self.molecule_input = QLineEdit()
-        layout.addWidget(self.molecule_label)
-        layout.addWidget(self.molecule_input)
+        molecule_layout.addWidget(self.molecule_input)
+        molecule_layout.addWidget(self.molecule_label)
+        layout.addLayout(molecule_layout)
 
         self.generate_button = QPushButton("Generate Absorption Spectra")
         self.generate_button.clicked.connect(self.generate_absorption_spectra)
