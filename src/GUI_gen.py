@@ -64,6 +64,13 @@ class GUI(QMainWindow):
         wavenumber_max_layout.addWidget(self.wavenumber_max_label)
         layout.addLayout(wavenumber_max_layout)
 
+        wavenumber_step_layout = QHBoxLayout()
+        self.wavenumber_step_input = QLineEdit()
+        self.wavenumber_step_label = QLabel("Wavenumber Step (cm-1)")
+        wavenumber_step_layout.addWidget(self.wavenumber_step_input)
+        wavenumber_step_layout.addWidget(self.wavenumber_step_label)
+        layout.addLayout(wavenumber_step_layout)
+
         molecule_layout = QHBoxLayout()
         self.molecule_input = QComboBox()
         self.molecule_input.addItems(["H2O", "CO2", "CO", "N2", "O2", "CH4", "H2", "NO", "NO2"])
