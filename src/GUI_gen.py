@@ -46,6 +46,16 @@ class GUI(QMainWindow):
         layout.addWidget(self.pressure_label)
         layout.addWidget(self.pressure_input)
 
+        self.wavenumber_min_label = QLabel("Minimum Wavenumber (cm-1):")
+        self.wavenumber_min_input = QLineEdit()
+        layout.addWidget(self.wavenumber_min_label)
+        layout.addWidget(self.wavenumber_min_input)
+
+        self.wavenumber_max_label = QLabel("Maximum Wavenumber (cm-1):")
+        self.wavenumber_max_input = QLineEdit()
+        layout.addWidget(self.wavenumber_max_label)
+        layout.addWidget(self.wavenumber_max_input)
+
         self.molecule_label = QLabel("Molecule:")
         self.molecule_input = QLineEdit()
         layout.addWidget(self.molecule_label)
