@@ -1,14 +1,15 @@
 """
 This script generates the GUI for the generation of spectra data, lookuptables and fitting of the experimental data
 There is a tab for each of the three functionalities
-It uses the pyqt6 library to generate the GUI
+It uses the pyqt5 library to generate the GUI
 """
 # Libraries
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QComboBox, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTabWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox
+
 # Importing the variables from the Variables.py script
-from Variables import args
-from Variables import args_dict
+# from Variables import args
+# from Variables import args_dict
 
 class GUI(QMainWindow):
     def __init__(self):
@@ -35,26 +36,73 @@ class GUI(QMainWindow):
     def init_absorption_tab(self):
         layout = QVBoxLayout()
 
-        self.temp_label = QLabel("Temperature (K):")
+        temp_layout = QHBoxLayout()
         self.temp_input = QLineEdit()
-        layout.addWidget(self.temp_label)
-        layout.addWidget(self.temp_input)
+        self.temp_label = QLabel("Temperature (K)")
+        temp_layout.addWidget(self.temp_input)
+        temp_layout.addWidget(self.temp_label)
+        layout.addLayout(temp_layout)
 
-        self.pressure_label = QLabel("Pressure (atm):")
+        pressure_layout = QHBoxLayout()
         self.pressure_input = QLineEdit()
-        layout.addWidget(self.pressure_label)
-        layout.addWidget(self.pressure_input)
+        self.pressure_label = QLabel("Pressure (atm)")
+        pressure_layout.addWidget(self.pressure_input)
+        pressure_layout.addWidget(self.pressure_label)
+        layout.addLayout(pressure_layout)
 
+        wavenumber_min_layout = QHBoxLayout()
+        self.wavenumber_min_input = QLineEdit()
+        self.wavenumber_min_label = QLabel("Minimum Wavenumber (cm-1)")
+        wavenumber_min_layout.addWidget(self.wavenumber_min_input)
+        wavenumber_min_layout.addWidget(self.wavenumber_min_label)
+        layout.addLayout(wavenumber_min_layout)
+
+        wavenumber_max_layout = QHBoxLayout()
+        self.wavenumber_max_input = QLineEdit()
+        self.wavenumber_max_label = QLabel("Maximum Wavenumber (cm-1)")
+        wavenumber_max_layout.addWidget(self.wavenumber_max_input)
+        wavenumber_max_layout.addWidget(self.wavenumber_max_label)
+        layout.addLayout(wavenumber_max_layout)
+
+        wavenumber_step_layout = QHBoxLayout()
+        self.wavenumber_step_input = QLineEdit()
+        self.wavenumber_step_label = QLabel("Wavenumber Step (cm-1)")
+        wavenumber_step_layout.addWidget(self.wavenumber_step_input)
+        wavenumber_step_layout.addWidget(self.wavenumber_step_label)
+        layout.addLayout(wavenumber_step_layout)
+
+        molecule_layout = QHBoxLayout()
+        self.molecule_input = QComboBox()
+        self.molecule_input.addItems(["H2O", "CO2", "CO", "N2", "O2", "CH4", "H2", "NO", "NO2"])
         self.molecule_label = QLabel("Molecule:")
-        self.molecule_input = QLineEdit()
-        layout.addWidget(self.molecule_label)
-        layout.addWidget(self.molecule_input)
+        molecule_layout.addWidget(self.molecule_input)
+        molecule_layout.addWidget(self.molecule_label)
+        layout.addLayout(molecule_layout)
 
         self.generate_button = QPushButton("Generate Absorption Spectra")
-        self.generate_button.clicked.connect() # connect to the function that 
-        # generates the absorption spectra
+        self.generate_button.clicked.connect(self.generate_absorption_spectra)
         layout.addWidget(self.generate_button)
 
         self.absorption_tab.setLayout(layout)
 
+    def init_fitting_tab(self):
+        layout = QVBoxLayout()
+        label = QLabel("Fitting Data functionality will be here.")
+        layout.addWidget(label)
+        self.fitting_tab.setLayout(layout)
 
+    def init_lookuptable_tab(self):
+        layout = QVBoxLayout()
+        label = QLabel("Lookuptable Generation functionality will be here.")
+        layout.addWidget(label)
+        self.lookuptable_tab.setLayout(layout)
+
+    def generate_absorption_spectra(self):
+        # Your code to generate absorption spectra goes here
+        print("Generating absorption spectra...")
+
+# Run the application
+app = QApplication(sys.argv)
+window = GUI()
+window.show()
+sys.exit(app.exec_())
