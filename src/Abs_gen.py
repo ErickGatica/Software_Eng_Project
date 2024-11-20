@@ -13,11 +13,12 @@ import matplotlib.pyplot as plt
 from hapi import *
 
 # Impor the variables from the Variables.py script
-from Variables import args
-from Variables import args_dict
+#from Variables import args
+#from Variables import args_dict
 
 # Constant
 R=8.31446261815324 #J/(mol K)
+Avog = 6.02214076e23 #mol^-1
 
 # Functions
 
@@ -54,18 +55,24 @@ def spectrum(P,T,length,numin,numax,molecule_id,isotopo_id,method_,wavestep,mola
     # Lets go with radiance Spectrum
     nu,radi = radianceSpectrum(nu,coef)
 
-    # Transforming the coef data to absorption
-    
-
+    # Transforming the coef data to absorption using the temperature and pressure
+    total_mol = P * 101325 / (R * T) 
+    mol_especie = total_mol * molar
+    absorption = np.multiply(coef,mol_especie/100**3*length*Avog)
     # Lets define a class to save the data
     class Data_spectrum:
-        def __init__(self, nu, coef, absorp, trans, radi,name_isoto):
+        def __init__(self, nu, coef, absorp, trans, radi,name_isoto, T, P, length, molecule, absorption):
             self.nu = nu
             self.coef = coef
             self.absorp = absorp
             self.trans = trans
             self.radi = radi
             self.name_isoto=name_isoto
+            self.temper = T
+            self.pressure = P
+            self.length = length
+            self.molecule = molecule
+            self.absorption = absorption
     
     # Set the font to resemble LaTeX
     #plt.rcParams['text.usetex'] = True
@@ -122,16 +129,29 @@ def spectrum(P,T,length,numin,numax,molecule_id,isotopo_id,method_,wavestep,mola
         plt.show()
         '''
 
-    return Data_spectrum(nu, coef, absorp, trans, radi, name_isoto)
+    return Data_spectrum(nu, coef, absorp, trans, radi, name_isoto, T, P, length, molecule, absorption)
 
 #spectrum(P,T,length,numin,numax,molecule_id,isotopo_id)
 
 
 # Function to plot using the data that was generated
 
-def plot_spectra(data):
-    # Set the font to resemble LateX
-    fig1, ax1 = plt.subplots()
-    # Creating the plot
-    ax1.plot(data.nu,data.coef)
+def plot_spectra(ax, data):
+    # Apply dark background styke
+    #plt.style.use('dark_background')
+
+    # Creating the plot and adding name of the molecule temperature pressure
+    ax.plot(data.nu, data.absorption, label=data.name_isoto + '$T$=' + str(data.temper) + 'K $P$=' + str(data.pressure) + 'atm')
+    
+    # Fill the area under the curve
+    ax.fill_between(data.nu, data.absorption, alpha=0.3)
+    
+    # Add a legend
+    ax.legend(loc='upper right')
+    
+    # Label the axes if not already labeled
+    if not ax.get_xlabel():
+        ax.set_xlabel(r'$\nu$ $cm^{-1}$')
+    if not ax.get_ylabel():
+        ax.set_ylabel(r'Absorption')
     
