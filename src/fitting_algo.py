@@ -1,14 +1,7 @@
-"""
-This is the script with the functions to fit the experimental data of absorption spectra of the molecules
-
-It will look for lookuptable first because it is faster than generate the data using HAPI
-If the lookuptable is not found, it will generate the data using HAPI and save it in the lookuptable folder for future use
-It will take the experimental data and the absorption spectra of the molecule as input and return the fitted data
-"""
 # Libraries
-
 import json
 import os
+import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from lmfit import Model
@@ -58,6 +51,81 @@ def setup_model_with_config(config_variables, model_setup_func):
     return model_setup_func(config_variables)
 
 
+def load_lookup_table(table_path):
+    """
+    Loads the lookup table if it exists.
+
+    Parameters
+    ----------
+    table_path : str
+        Path to the lookup table file.
+
+    Returns
+    -------
+    lookup_table : pandas.DataFrame
+        The loaded lookup table.
+    """
+    if os.path.exists(table_path):
+        return pd.read_csv(table_path)
+    else:
+        return None
+
+
+def get_spectral_data_from_lookup_or_generate(lookup_table, config, x_wvn, transmission):
+    """
+    Retrieves spectral data from the lookup table if available; otherwise, generates it.
+
+    Parameters
+    ----------
+    lookup_table : pandas.DataFrame
+        The lookup table containing precomputed spectral data.
+    config : dict
+        Configuration dictionary with fitting parameters.
+    x_wvn : numpy array
+        Wavenumber array.
+    transmission : numpy array
+        Transmission array.
+
+    Returns
+    -------
+    spectral_data : numpy array
+        The spectral data for the given conditions.
+    """
+    temperature = config["fitting"]["temperature"]
+    mole_fraction = config["fitting"]["molefraction"]
+    shift = config["fitting"]["shift"]
+
+    # Check if the data exists in the lookup table
+    if lookup_table is not None:
+        match = lookup_table[
+            (lookup_table["Temperature (K)"] == temperature) &
+            (lookup_table["Mole Fraction"] == mole_fraction) &
+            (lookup_table["Shift"] == shift)
+        ]
+
+        if not match.empty:
+            return np.array(match["Absorption Coefficients"].iloc[0])
+
+    # If not in the lookup table, generate the data using HAPI or other tools
+    print(f"No matching data found in lookup table. Generating for T={temperature}, mole_fraction={mole_fraction}, shift={shift}...")
+    spectral_data = pld.generate_spectral_data(x_wvn, temperature, mole_fraction, shift)
+
+    # Save the new data to the lookup table
+    new_entry = {
+        "Temperature (K)": temperature,
+        "Mole Fraction": mole_fraction,
+        "Shift": shift,
+        "Absorption Coefficients": spectral_data.tolist(),
+    }
+    if lookup_table is not None:
+        lookup_table = pd.concat([lookup_table, pd.DataFrame([new_entry])], ignore_index=True)
+    else:
+        lookup_table = pd.DataFrame([new_entry])
+    lookup_table.to_csv('lookup_table.csv', index=False)
+
+    return spectral_data
+
+
 def fit_data_from_directory(
         x_wvn,
         transmission,
@@ -67,7 +135,8 @@ def fit_data_from_directory(
         calc_cepstrum_func=pld.calc_cepstrum,
         weight_func=pld.weight_func,
         plot_intermediate_steps=False,
-        verbose=False
+        verbose=False,
+        lookup_table_path="lookup_table.csv"
 ):
     """
     Fits spectrum to a model using lmfit and parameters from a directory of configuration files.
@@ -92,6 +161,8 @@ def fit_data_from_directory(
         If True, plots intermediate steps of fitting.
     verbose : bool, optional
         If True, prints parameter information.
+    lookup_table_path : str, optional
+        Path to the lookup table file.
 
     Returns
     -------
@@ -101,6 +172,9 @@ def fit_data_from_directory(
     config_variables = load_config_from_directory(config_dir)
     if not config_variables:
         raise ValueError("No configuration files found or files are empty in the directory.")
+
+    lookup_table = load_lookup_table(lookup_table_path)
+    spectral_data = get_spectral_data_from_lookup_or_generate(lookup_table, config_variables, x_wvn, transmission)
 
     pbar = tqdm(total=None, desc="Fitting progress")
 
