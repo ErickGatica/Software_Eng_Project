@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHB
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QFileDialog, QPushButton
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -184,7 +186,7 @@ class GUI(QMainWindow):
         splitter.addWidget(input_group_box)
 
         # Apply dark background style globally
-        #plt.style.use('dark_background')
+        plt.style.use('dark_background')
 
         # Placeholder for the plot area
         self.plot_canvas = FigureCanvas(Figure())
@@ -200,10 +202,98 @@ class GUI(QMainWindow):
         self.absorption_tab.setLayout(main_layout)
 
     def init_fitting_tab(self):
-        layout = QVBoxLayout()
-        label = QLabel("Fitting Data functionality will be here.")
-        layout.addWidget(label)
-        self.fitting_tab.setLayout(layout)
+        # Create the main layout for the fitting tab
+        main_layout = QVBoxLayout()
+
+        # Create a splitter for resizable input and plot areas
+        splitter = QSplitter(Qt.Horizontal)
+
+        # Group for inputs
+        input_group_box = QGroupBox("Input Parameters")
+        input_layout = QVBoxLayout()
+
+        # Data path
+        data_path_layout = QHBoxLayout()
+        self.data_path_input = QLineEdit()
+        self.data_path_label = QLabel("Data Path")
+        self.data_path_button = QPushButton("Browse")
+        self.data_path_button.clicked.connect(self.browse_folder)
+
+        data_path_layout.addWidget(self.data_path_input)
+        data_path_layout.addWidget(self.data_path_button)
+        data_path_layout.addWidget(self.data_path_label)
+        input_layout.addLayout(data_path_layout)
+
+        # Filename
+        filename_layout = QHBoxLayout()
+        self.filename_input = QLineEdit()
+        self.filename_label = QLabel("Filename")
+        filename_layout.addWidget(self.filename_input)
+        filename_layout.addWidget(self.filename_label)
+        input_layout.addLayout(filename_layout)
+
+        # Results path
+        results_path_layout = QHBoxLayout()
+        self.results_path_input = QLineEdit()
+        self.results_path_label = QLabel("Results Path")
+        self.results_path_button = QPushButton("Browse")
+        results_path_layout.addWidget(self.results_path_input)
+        results_path_layout.addWidget(self.results_path_button)
+        results_path_layout.addWidget(self.results_path_label)
+        input_layout.addLayout(results_path_layout)
+
+        # Results filename
+        results_filename_layout = QHBoxLayout()
+        self.results_filename_input = QLineEdit()
+        self.results_filename_label = QLabel("Results Filename")
+        results_filename_layout.addWidget(self.results_filename_input)
+        results_filename_layout.addWidget(self.results_filename_label)
+        input_layout.addLayout(results_filename_layout)
+
+        # Plot name
+        plot_name_layout = QHBoxLayout()
+        self.plot_name_input = QLineEdit()
+        self.plot_name_label = QLabel("Plot Name")
+        plot_name_layout.addWidget(self.plot_name_input)
+        plot_name_layout.addWidget(self.plot_name_label)
+        input_layout.addLayout(plot_name_layout)
+
+        # Linelist path
+        linelist_path_layout = QHBoxLayout()
+        self.linelist_path_input = QLineEdit()
+        self.linelist_path_label = QLabel("Linelist Path")
+        self.linelist_path_button = QPushButton("Browse")
+        linelist_path_layout.addWidget(self.linelist_path_input)
+        linelist_path_layout.addWidget(self.linelist_path_button)
+        linelist_path_layout.addWidget(self.linelist_path_label)
+        input_layout.addLayout(linelist_path_layout)
+        
+
+        # Display the input group box
+        input_group_box.setLayout(input_layout)
+        splitter.addWidget(input_group_box)
+
+        
+        # Creating canvas to plot fit and experimental data
+        # Apply dark background style globally
+        plt.style.use('dark_background')
+
+        # Placeholder for the plot area
+        self.plot_canvas = FigureCanvas(Figure())
+        self.toolbar = NavigationToolbar(self.plot_canvas, self)
+        plot_layout = QVBoxLayout()
+        plot_layout.addWidget(self.toolbar)
+        plot_layout.addWidget(self.plot_canvas)
+        plot_frame = QFrame()
+        plot_frame.setLayout(plot_layout)
+        splitter.addWidget(plot_frame)
+
+        # Add the splitter to the main layout
+        main_layout.addWidget(splitter)
+
+        # Set the main layout for the fitting tab
+        self.fitting_tab.setLayout(main_layout)
+
 
     def init_lookuptable_tab(self):
         layout = QVBoxLayout()
@@ -237,6 +327,11 @@ class GUI(QMainWindow):
         ax.clear()
         self.plot_canvas.draw()
         print("Plot cleared.")
+    
+    def browse_folder(self):
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+        if folder_path:
+            self.data_path_input.setText(folder_path)
 
 # Run the application
 app = QApplication(sys.argv)
