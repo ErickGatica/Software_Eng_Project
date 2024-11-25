@@ -267,7 +267,7 @@ class GUI(QMainWindow):
         linelist_path_layout.addWidget(self.linelist_path_button)
         linelist_path_layout.addWidget(self.linelist_path_label)
         input_layout.addLayout(linelist_path_layout)
-        
+
 
         # Display the input group box
         input_group_box.setLayout(input_layout)
@@ -296,10 +296,124 @@ class GUI(QMainWindow):
 
 
     def init_lookuptable_tab(self):
-        layout = QVBoxLayout()
-        label = QLabel("Lookuptable Generation functionality will be here.")
-        layout.addWidget(label)
-        self.lookuptable_tab.setLayout(layout)
+        # Create the main layout for the lookuptable tab
+        main_layout = QVBoxLayout()
+
+        # Create a splitter for resizable input and plot areas
+        splitter = QSplitter(Qt.Horizontal)
+
+        # Group for inputs
+        input_group_box = QGroupBox("Input Parameters")
+        input_layout = QVBoxLayout()
+
+        # Min temperature for Lookuptable
+        min_temp_layout = QHBoxLayout()
+        self.min_temp_input = QLineEdit()
+        self.min_temp_label = QLabel("Min Temperature (K)")
+        min_temp_layout.addWidget(self.min_temp_input)
+        min_temp_layout.addWidget(self.min_temp_label)
+        input_layout.addLayout(min_temp_layout)
+
+        # Max temperature for Lookuptable
+        max_temp_layout = QHBoxLayout()
+        self.max_temp_input = QLineEdit()
+        self.max_temp_label = QLabel("Max Temperature (K)")
+        max_temp_layout.addWidget(self.max_temp_input)
+        max_temp_layout.addWidget(self.max_temp_label)
+        input_layout.addLayout(max_temp_layout)
+
+        # Resolution for temperature
+        resolution_temp_layout = QHBoxLayout()
+        self.resolution_temp_input = QLineEdit()
+        self.resolution_temp_label = QLabel("Resolution Temperature (K)")
+        resolution_temp_layout.addWidget(self.resolution_temp_input)
+        resolution_temp_layout.addWidget(self.resolution_temp_label)
+        input_layout.addLayout(resolution_temp_layout)
+
+        # Min mole fraction for Lookuptable
+        min_mole_fraction_layout = QHBoxLayout()
+        self.min_mole_fraction_input = QLineEdit()
+        self.min_mole_fraction_label = QLabel("Min Mole Fraction")
+        min_mole_fraction_layout.addWidget(self.min_mole_fraction_input)
+        min_mole_fraction_layout.addWidget(self.min_mole_fraction_label)
+        input_layout.addLayout(min_mole_fraction_layout)
+
+        # Max mole fraction for Lookuptable
+        max_mole_fraction_layout = QHBoxLayout()
+        self.max_mole_fraction_input = QLineEdit()
+        self.max_mole_fraction_label = QLabel("Max Mole Fraction")
+        max_mole_fraction_layout.addWidget(self.max_mole_fraction_input)
+        max_mole_fraction_layout.addWidget(self.max_mole_fraction_label)
+        input_layout.addLayout(max_mole_fraction_layout)
+
+        # Resolution for mole fraction
+        resolution_mole_fraction_layout = QHBoxLayout()
+        self.resolution_mole_fraction_input = QLineEdit()
+        self.resolution_mole_fraction_label = QLabel("Resolution Mole Fraction")
+        resolution_mole_fraction_layout.addWidget(self.resolution_mole_fraction_input)
+        resolution_mole_fraction_layout.addWidget(self.resolution_mole_fraction_label)
+        input_layout.addLayout(resolution_mole_fraction_layout)
+
+        # Pressure for Lookuptable
+        pressure_layout = QHBoxLayout()
+        self.pressure_input = QLineEdit()
+        self.pressure_label = QLabel("Pressure (atm)")
+        pressure_layout.addWidget(self.pressure_input)
+        pressure_layout.addWidget(self.pressure_label)
+        input_layout.addLayout(pressure_layout)
+
+        # Shift range +- this value
+        shift_range_layout = QHBoxLayout()
+        self.shift_range_input = QLineEdit()
+        self.shift_range_label = QLabel("Shift Range +-")
+        shift_range_layout.addWidget(self.shift_range_input)
+        shift_range_layout.addWidget(self.shift_range_label)
+        input_layout.addLayout(shift_range_layout)
+
+        # Min wavenumber for Lookuptable
+        min_wavenumber_layout = QHBoxLayout()
+        self.min_wavenumber_input = QLineEdit()
+        self.min_wavenumber_label = QLabel("Min Wavenumber (cm-1)")
+        min_wavenumber_layout.addWidget(self.min_wavenumber_input)
+        min_wavenumber_layout.addWidget(self.min_wavenumber_label)
+        input_layout.addLayout(min_wavenumber_layout)
+
+        # Max wavenumber for Lookuptable
+        max_wavenumber_layout = QHBoxLayout()
+        self.max_wavenumber_input = QLineEdit()
+        self.max_wavenumber_label = QLabel("Max Wavenumber (cm-1)")
+        max_wavenumber_layout.addWidget(self.max_wavenumber_input)
+        max_wavenumber_layout.addWidget(self.max_wavenumber_label)
+        input_layout.addLayout(max_wavenumber_layout)
+
+        # Resolution for wavenumber
+        resolution_wavenumber_layout = QHBoxLayout()
+        self.resolution_wavenumber_input = QLineEdit()
+        self.resolution_wavenumber_label = QLabel("Resolution Wavenumber (cm-1)")
+        resolution_wavenumber_layout.addWidget(self.resolution_wavenumber_input)
+        resolution_wavenumber_layout.addWidget(self.resolution_wavenumber_label)
+        input_layout.addLayout(resolution_wavenumber_layout)
+
+        # Window to print the progress of the lookuptable generation
+        self.progress_window = QLineEdit()
+        self.progress_window.setReadOnly(True)
+        input_layout.addWidget(self.progress_window)
+
+        # Button to start the lookup table generation
+        self.generate_button = QPushButton("Generate Lookuptable")
+        input_layout.addWidget(self.generate_button)
+
+        # Display the input group box
+        input_group_box.setLayout(input_layout)
+        splitter.addWidget(input_group_box)
+
+        # Add the splitter to the main layout
+        main_layout.addWidget(splitter)
+
+        # Set the main layout for the lookuptable tab
+        self.lookuptable_tab.setLayout(main_layout)
+        
+
 
     def generate_absorption_spectra(self):
         molecule = self.molecule_input.currentText()
