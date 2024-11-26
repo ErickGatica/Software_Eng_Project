@@ -1,61 +1,79 @@
-"""
-This is the script with the functions to fit the experimental data of absorption spectra of the molecules
-
-It will look for lookuptable first because it is faster than generate the data using HAPI
-If the lookuptable is not found, it will generate the data using HAPI and save it in the lookuptable folder for future use
-It will take the experimental data and the absorption spectra of the molecule as input and return the fitted data
-"""
-# Libraries
-
-import json
-import os
+import h5py
 import numpy as np
+import os
 from tqdm import tqdm
 from lmfit import Model
 import pldspectrapy as pld  # Assuming pldspectrapy package provides necessary spectral analysis tools
 
 
-def load_config_from_directory(config_dir):
+def load_lookup_table_hdf5(hdf5_path):
     """
-    Loads configuration parameters from a specified directory.
+    Loads the lookup table from an HDF5 file.
 
     Parameters
     ----------
-    config_dir : str
-        Directory path where configuration files are stored.
+    hdf5_path : str
+        Path to the HDF5 file.
 
     Returns
     -------
+    hdf5_file : h5py.File or None
+        The opened HDF5 file handle or None if the file doesn't exist.
+    """
+    if os.path.exists(hdf5_path):
+        return h5py.File(hdf5_path, 'a')  # Open in append mode
+    else:
+        return None
+
+
+def get_spectral_data_from_hdf5_or_generate(hdf5_file, config, x_wvn):
+    """
+    Retrieves spectral data from the HDF5 lookup table if available; otherwise, generates it.
+
+    Parameters
+    ----------
+    hdf5_file : h5py.File
+        The HDF5 file handle for the lookup table.
     config : dict
-        Dictionary containing configuration parameters loaded from the files.
-    """
-    config = {}
-    for filename in os.listdir(config_dir):
-        if filename.endswith(".json"):
-            with open(os.path.join(config_dir, filename), 'r') as f:
-                config.update(json.load(f))
-    return config
-
-
-def setup_model_with_config(config_variables, model_setup_func):
-    """
-    Set up the model and parameters based on configuration variables.
-
-    Parameters
-    ----------
-    config_variables : dict
-        Dictionary with fitting configuration parameters.
-    model_setup_func : callable
-        Function to set up models using the configuration.
+        Configuration dictionary with fitting parameters.
+    x_wvn : numpy array
+        Wavenumber array.
 
     Returns
     -------
-    model : lmfit.Model
-        The initialized model for fitting.
-    parameters : lmfit.Parameters
-        The model parameters.
+    spectral_data : numpy array
+        The spectral data for the given conditions.
     """
-    return model_setup_func(config_variables)
+    temperature = config["fitting"]["temperature"]
+    mole_fraction = config["fitting"]["molefraction"]
+    shift = config["fitting"]["shift"]
+
+    if hdf5_file is not None:
+        # Construct indices to look up data
+        temp_idx = np.argmin(np.abs(hdf5_file['Temperature'][:] - temperature))
+        mole_idx = np.argmin(np.abs(hdf5_file['MoleFraction'][:] - mole_fraction))
+        shift_idx = np.argmin(np.abs(hdf5_file['Shift'][:] - shift))
+
+        # Check if the data exists
+        try:
+            spectral_data = hdf5_file['AbsorptionCoefficients'][temp_idx, mole_idx, shift_idx, :]
+            if np.all(np.isfinite(spectral_data)):
+                return spectral_data
+        except KeyError:
+            pass
+
+    # If not in the lookup table, generate the data using HAPI or other tools
+    print(f"No matching data found in HDF5. Generating for T={temperature}, mole_fraction={mole_fraction}, shift={shift}...")
+    spectral_data = pld.generate_spectral_data(x_wvn, temperature, mole_fraction, shift)
+
+    # Save the new data into the HDF5 table
+    if hdf5_file is not None:
+        temp_idx = np.argmin(np.abs(hdf5_file['Temperature'][:] - temperature))
+        mole_idx = np.argmin(np.abs(hdf5_file['MoleFraction'][:] - mole_fraction))
+        shift_idx = np.argmin(np.abs(hdf5_file['Shift'][:] - shift))
+        hdf5_file['AbsorptionCoefficients'][temp_idx, mole_idx, shift_idx, :] = spectral_data
+
+    return spectral_data
 
 
 def fit_data_from_directory(
@@ -67,7 +85,8 @@ def fit_data_from_directory(
         calc_cepstrum_func=pld.calc_cepstrum,
         weight_func=pld.weight_func,
         plot_intermediate_steps=False,
-        verbose=False
+        verbose=False,
+        lookup_table_path="lookup_table.h5"
 ):
     """
     Fits spectrum to a model using lmfit and parameters from a directory of configuration files.
@@ -92,6 +111,8 @@ def fit_data_from_directory(
         If True, plots intermediate steps of fitting.
     verbose : bool, optional
         If True, prints parameter information.
+    lookup_table_path : str, optional
+        Path to the HDF5 lookup table file.
 
     Returns
     -------
@@ -101,6 +122,9 @@ def fit_data_from_directory(
     config_variables = load_config_from_directory(config_dir)
     if not config_variables:
         raise ValueError("No configuration files found or files are empty in the directory.")
+
+    hdf5_file = load_lookup_table_hdf5(lookup_table_path)
+    spectral_data = get_spectral_data_from_hdf5_or_generate(hdf5_file, config_variables, x_wvn)
 
     pbar = tqdm(total=None, desc="Fitting progress")
 
@@ -134,5 +158,8 @@ def fit_data_from_directory(
 
     if plot_intermediate_steps:
         generate_tutorial_fit_plots(x_wvn, transmission, config_variables, Fit)
+
+    if hdf5_file is not None:
+        hdf5_file.close()
 
     return Fit
