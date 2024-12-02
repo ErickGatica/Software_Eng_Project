@@ -5,7 +5,10 @@ It uses the pyqt5 library to generate the GUI
 """
 # Libraries
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QPushButton, QComboBox, QFrame, QGroupBox, QMenuBar, QAction, QSplitter
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QTabWidget, QLabel, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QComboBox, QFrame, QGroupBox, QMenuBar, QAction
+from PyQt5.QtWidgets import QSplitter, QFormLayout, QHBoxLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -17,6 +20,7 @@ import matplotlib.pyplot as plt
 
 # Importing the functions from the Abs_gen.py script
 from Abs_gen import spectrum, plot_spectra
+
 
 # Importing the variables from the Variables.py script
 # from Variables import args
@@ -99,88 +103,83 @@ class GUI(QMainWindow):
         splitter = QSplitter(Qt.Horizontal)
 
         input_group_box = QGroupBox("Input Parameters")
-        input_layout = QVBoxLayout()
+        input_layout = QFormLayout()
 
-        molecule_layout = QHBoxLayout()
+        # Set a fixed width for the input boxes
+        input_width = 200
+
+        # Molecule
         self.molecule_input = QComboBox()
         self.molecule_input.addItems(["H2O", "CO2", "CO", "N2", "O2", "CH4", "H2", "NO", "NO2"])
+        self.molecule_input.setFixedWidth(input_width)
         self.molecule_label = QLabel("Molecule:")
-        molecule_layout.addWidget(self.molecule_input)
-        molecule_layout.addWidget(self.molecule_label)
-        input_layout.addLayout(molecule_layout)
+        input_layout.addRow(self.molecule_label, self.molecule_input)
 
-        isotopologue_layout = QHBoxLayout()
+        # Isotopologue
         self.isotopologue_input = QComboBox()
         self.isotopologue_input.addItems(["1", "2", "3"])
+        self.isotopologue_input.setFixedWidth(input_width)
         self.isotopologue_label = QLabel("Isotopologue")
-        isotopologue_layout.addWidget(self.isotopologue_input)
-        isotopologue_layout.addWidget(self.isotopologue_label)
-        input_layout.addLayout(isotopologue_layout)
+        input_layout.addRow(self.isotopologue_label, self.isotopologue_input)
 
-        temp_layout = QHBoxLayout()
+        # Temperature
         self.temp_input = QLineEdit()
+        self.temp_input.setFixedWidth(input_width)
         self.temp_label = QLabel("Temperature (K)")
-        temp_layout.addWidget(self.temp_input)
-        temp_layout.addWidget(self.temp_label)
-        input_layout.addLayout(temp_layout)
+        input_layout.addRow(self.temp_label, self.temp_input)
 
-        pressure_layout = QHBoxLayout()
+        # Pressure
         self.pressure_input = QLineEdit()
+        self.pressure_input.setFixedWidth(input_width)
         self.pressure_label = QLabel("Pressure (atm)")
-        pressure_layout.addWidget(self.pressure_input)
-        pressure_layout.addWidget(self.pressure_label)
-        input_layout.addLayout(pressure_layout)
+        input_layout.addRow(self.pressure_label, self.pressure_input)
 
-        molar_fraction_layout = QHBoxLayout() 
+        # Molar Fraction
         self.molar_fraction_input = QLineEdit()
+        self.molar_fraction_input.setFixedWidth(input_width)
         self.molar_fraction_label = QLabel("Molar Fraction")
-        molar_fraction_layout.addWidget(self.molar_fraction_input)
-        molar_fraction_layout.addWidget(self.molar_fraction_label)
-        input_layout.addLayout(molar_fraction_layout)
+        input_layout.addRow(self.molar_fraction_label, self.molar_fraction_input)
 
-        length_layout = QHBoxLayout()
+        # Path Length
         self.length_input = QLineEdit()
+        self.length_input.setFixedWidth(input_width)
         self.length_label = QLabel("Path Length (cm)")
-        length_layout.addWidget(self.length_input)
-        length_layout.addWidget(self.length_label)
-        input_layout.addLayout(length_layout)
+        input_layout.addRow(self.length_label, self.length_input)
 
-        wavenumber_min_layout = QHBoxLayout()
+        # Minimum Wavenumber
         self.wavenumber_min_input = QLineEdit()
+        self.wavenumber_min_input.setFixedWidth(input_width)
         self.wavenumber_min_label = QLabel("Minimum Wavenumber (cm-1)")
-        wavenumber_min_layout.addWidget(self.wavenumber_min_input)
-        wavenumber_min_layout.addWidget(self.wavenumber_min_label)
-        input_layout.addLayout(wavenumber_min_layout)
+        input_layout.addRow(self.wavenumber_min_label, self.wavenumber_min_input)
 
-        wavenumber_max_layout = QHBoxLayout()
+        # Maximum Wavenumber
         self.wavenumber_max_input = QLineEdit()
+        self.wavenumber_max_input.setFixedWidth(input_width)
         self.wavenumber_max_label = QLabel("Maximum Wavenumber (cm-1)")
-        wavenumber_max_layout.addWidget(self.wavenumber_max_input)
-        wavenumber_max_layout.addWidget(self.wavenumber_max_label)
-        input_layout.addLayout(wavenumber_max_layout)
+        input_layout.addRow(self.wavenumber_max_label, self.wavenumber_max_input)
 
-        wavenumber_step_layout = QHBoxLayout()
+        # Wavenumber Step
         self.wavenumber_step_input = QLineEdit()
+        self.wavenumber_step_input.setFixedWidth(input_width)
         self.wavenumber_step_label = QLabel("Wavenumber Step (cm-1)")
-        wavenumber_step_layout.addWidget(self.wavenumber_step_input)
-        wavenumber_step_layout.addWidget(self.wavenumber_step_label)
-        input_layout.addLayout(wavenumber_step_layout)
+        input_layout.addRow(self.wavenumber_step_label, self.wavenumber_step_input)
 
-        method_layout = QHBoxLayout()
+        # Method
         self.method_input = QComboBox()
         self.method_input.addItems(["HT", "V", "L", "D"])
+        self.method_input.setFixedWidth(input_width)
         self.method_label = QLabel("Method")
-        method_layout.addWidget(self.method_input)
-        method_layout.addWidget(self.method_label)
-        input_layout.addLayout(method_layout)
+        input_layout.addRow(self.method_label, self.method_input)
 
+        # Generate button
         self.generate_button = QPushButton("Generate Absorption Spectra")
         self.generate_button.clicked.connect(self.generate_absorption_spectra)
-        input_layout.addWidget(self.generate_button)
+        input_layout.addRow(self.generate_button)
 
+        # Clear button
         self.clear_button = QPushButton("Clear Plot")
         self.clear_button.clicked.connect(self.clear_plot)
-        input_layout.addWidget(self.clear_button)
+        input_layout.addRow(self.clear_button)
 
         input_group_box.setLayout(input_layout)
         splitter.addWidget(input_group_box)
@@ -210,70 +209,69 @@ class GUI(QMainWindow):
 
         # Group for inputs
         input_group_box = QGroupBox("Input Parameters")
-        input_layout = QVBoxLayout()
+        input_layout = QFormLayout()
+
+        # Set a fixed width for the input boxes
+        input_width = 200
 
         # Data path
-        data_path_layout = QHBoxLayout()
         self.data_path_input = QLineEdit()
+        self.data_path_input.setFixedWidth(input_width)
         self.data_path_label = QLabel("Data Path")
         self.data_path_button = QPushButton("Browse")
         self.data_path_button.clicked.connect(self.browse_folder)
-
+        data_path_layout = QHBoxLayout()
         data_path_layout.addWidget(self.data_path_input)
         data_path_layout.addWidget(self.data_path_button)
-        data_path_layout.addWidget(self.data_path_label)
-        input_layout.addLayout(data_path_layout)
+        input_layout.addRow(self.data_path_label, data_path_layout)
 
         # Filename
-        filename_layout = QHBoxLayout()
         self.filename_input = QLineEdit()
+        self.filename_input.setFixedWidth(input_width)
         self.filename_label = QLabel("Filename")
-        filename_layout.addWidget(self.filename_input)
-        filename_layout.addWidget(self.filename_label)
-        input_layout.addLayout(filename_layout)
+        input_layout.addRow(self.filename_label, self.filename_input)
 
         # Results path
-        results_path_layout = QHBoxLayout()
         self.results_path_input = QLineEdit()
+        self.results_path_input.setFixedWidth(input_width)
         self.results_path_label = QLabel("Results Path")
         self.results_path_button = QPushButton("Browse")
+        results_path_layout = QHBoxLayout()
         results_path_layout.addWidget(self.results_path_input)
         results_path_layout.addWidget(self.results_path_button)
-        results_path_layout.addWidget(self.results_path_label)
-        input_layout.addLayout(results_path_layout)
+        input_layout.addRow(self.results_path_label, results_path_layout)
 
         # Results filename
-        results_filename_layout = QHBoxLayout()
         self.results_filename_input = QLineEdit()
+        self.results_filename_input.setFixedWidth(input_width)
         self.results_filename_label = QLabel("Results Filename")
-        results_filename_layout.addWidget(self.results_filename_input)
-        results_filename_layout.addWidget(self.results_filename_label)
-        input_layout.addLayout(results_filename_layout)
+        input_layout.addRow(self.results_filename_label, self.results_filename_input)
 
         # Plot name
-        plot_name_layout = QHBoxLayout()
         self.plot_name_input = QLineEdit()
+        self.plot_name_input.setFixedWidth(input_width)
         self.plot_name_label = QLabel("Plot Name")
-        plot_name_layout.addWidget(self.plot_name_input)
-        plot_name_layout.addWidget(self.plot_name_label)
-        input_layout.addLayout(plot_name_layout)
+        input_layout.addRow(self.plot_name_label, self.plot_name_input)
 
         # Linelist path
-        linelist_path_layout = QHBoxLayout()
         self.linelist_path_input = QLineEdit()
+        self.linelist_path_input.setFixedWidth(input_width)
         self.linelist_path_label = QLabel("Linelist Path")
         self.linelist_path_button = QPushButton("Browse")
+        linelist_path_layout = QHBoxLayout()
         linelist_path_layout.addWidget(self.linelist_path_input)
         linelist_path_layout.addWidget(self.linelist_path_button)
-        linelist_path_layout.addWidget(self.linelist_path_label)
-        input_layout.addLayout(linelist_path_layout)
+        input_layout.addRow(self.linelist_path_label, linelist_path_layout)
 
+        # Fitting button
+        self.fitting_button = QPushButton("Fit Data")
+        input_layout.addRow(self.fitting_button)
 
         # Display the input group box
         input_group_box.setLayout(input_layout)
+        self.fitting_button.clicked.connect(self.fiting_data)
         splitter.addWidget(input_group_box)
 
-        
         # Creating canvas to plot fit and experimental data
         # Apply dark background style globally
         plt.style.use('dark_background')
@@ -302,106 +300,87 @@ class GUI(QMainWindow):
         # Create a splitter for resizable input and plot areas
         splitter = QSplitter(Qt.Horizontal)
 
-        # Group for inputs
+       # Group for inputs
         input_group_box = QGroupBox("Input Parameters")
-        input_layout = QVBoxLayout()
+        input_layout = QFormLayout()
+
+        # Set a fixed width for the input boxes
+        input_width = 200
 
         # Min temperature for Lookuptable
-        min_temp_layout = QHBoxLayout()
         self.min_temp_input = QLineEdit()
+        self.min_temp_input.setFixedWidth(input_width)
         self.min_temp_label = QLabel("Min Temperature (K)")
-        min_temp_layout.addWidget(self.min_temp_input)
-        min_temp_layout.addWidget(self.min_temp_label)
-        input_layout.addLayout(min_temp_layout)
+        input_layout.addRow(self.min_temp_label, self.min_temp_input)
 
         # Max temperature for Lookuptable
-        max_temp_layout = QHBoxLayout()
         self.max_temp_input = QLineEdit()
+        self.max_temp_input.setFixedWidth(input_width)
         self.max_temp_label = QLabel("Max Temperature (K)")
-        max_temp_layout.addWidget(self.max_temp_input)
-        max_temp_layout.addWidget(self.max_temp_label)
-        input_layout.addLayout(max_temp_layout)
+        input_layout.addRow(self.max_temp_label, self.max_temp_input)
 
         # Resolution for temperature
-        resolution_temp_layout = QHBoxLayout()
         self.resolution_temp_input = QLineEdit()
+        self.resolution_temp_input.setFixedWidth(input_width)
         self.resolution_temp_label = QLabel("Resolution Temperature (K)")
-        resolution_temp_layout.addWidget(self.resolution_temp_input)
-        resolution_temp_layout.addWidget(self.resolution_temp_label)
-        input_layout.addLayout(resolution_temp_layout)
+        input_layout.addRow(self.resolution_temp_label, self.resolution_temp_input)
 
         # Min mole fraction for Lookuptable
-        min_mole_fraction_layout = QHBoxLayout()
         self.min_mole_fraction_input = QLineEdit()
+        self.min_mole_fraction_input.setFixedWidth(input_width)
         self.min_mole_fraction_label = QLabel("Min Mole Fraction")
-        min_mole_fraction_layout.addWidget(self.min_mole_fraction_input)
-        min_mole_fraction_layout.addWidget(self.min_mole_fraction_label)
-        input_layout.addLayout(min_mole_fraction_layout)
+        input_layout.addRow(self.min_mole_fraction_label, self.min_mole_fraction_input)
 
         # Max mole fraction for Lookuptable
-        max_mole_fraction_layout = QHBoxLayout()
         self.max_mole_fraction_input = QLineEdit()
+        self.max_mole_fraction_input.setFixedWidth(input_width)
         self.max_mole_fraction_label = QLabel("Max Mole Fraction")
-        max_mole_fraction_layout.addWidget(self.max_mole_fraction_input)
-        max_mole_fraction_layout.addWidget(self.max_mole_fraction_label)
-        input_layout.addLayout(max_mole_fraction_layout)
+        input_layout.addRow(self.max_mole_fraction_label, self.max_mole_fraction_input)
 
         # Resolution for mole fraction
-        resolution_mole_fraction_layout = QHBoxLayout()
         self.resolution_mole_fraction_input = QLineEdit()
+        self.resolution_mole_fraction_input.setFixedWidth(input_width)
         self.resolution_mole_fraction_label = QLabel("Resolution Mole Fraction")
-        resolution_mole_fraction_layout.addWidget(self.resolution_mole_fraction_input)
-        resolution_mole_fraction_layout.addWidget(self.resolution_mole_fraction_label)
-        input_layout.addLayout(resolution_mole_fraction_layout)
+        input_layout.addRow(self.resolution_mole_fraction_label, self.resolution_mole_fraction_input)
 
         # Pressure for Lookuptable
-        pressure_layout = QHBoxLayout()
         self.pressure_input = QLineEdit()
+        self.pressure_input.setFixedWidth(input_width)
         self.pressure_label = QLabel("Pressure (atm)")
-        pressure_layout.addWidget(self.pressure_input)
-        pressure_layout.addWidget(self.pressure_label)
-        input_layout.addLayout(pressure_layout)
+        input_layout.addRow(self.pressure_label, self.pressure_input)
 
         # Shift range +- this value
-        shift_range_layout = QHBoxLayout()
         self.shift_range_input = QLineEdit()
+        self.shift_range_input.setFixedWidth(input_width)
         self.shift_range_label = QLabel("Shift Range +-")
-        shift_range_layout.addWidget(self.shift_range_input)
-        shift_range_layout.addWidget(self.shift_range_label)
-        input_layout.addLayout(shift_range_layout)
+        input_layout.addRow(self.shift_range_label, self.shift_range_input)
 
         # Min wavenumber for Lookuptable
-        min_wavenumber_layout = QHBoxLayout()
         self.min_wavenumber_input = QLineEdit()
+        self.min_wavenumber_input.setFixedWidth(input_width)
         self.min_wavenumber_label = QLabel("Min Wavenumber (cm-1)")
-        min_wavenumber_layout.addWidget(self.min_wavenumber_input)
-        min_wavenumber_layout.addWidget(self.min_wavenumber_label)
-        input_layout.addLayout(min_wavenumber_layout)
+        input_layout.addRow(self.min_wavenumber_label, self.min_wavenumber_input)
 
         # Max wavenumber for Lookuptable
-        max_wavenumber_layout = QHBoxLayout()
         self.max_wavenumber_input = QLineEdit()
+        self.max_wavenumber_input.setFixedWidth(input_width)
         self.max_wavenumber_label = QLabel("Max Wavenumber (cm-1)")
-        max_wavenumber_layout.addWidget(self.max_wavenumber_input)
-        max_wavenumber_layout.addWidget(self.max_wavenumber_label)
-        input_layout.addLayout(max_wavenumber_layout)
+        input_layout.addRow(self.max_wavenumber_label, self.max_wavenumber_input)
 
         # Resolution for wavenumber
-        resolution_wavenumber_layout = QHBoxLayout()
         self.resolution_wavenumber_input = QLineEdit()
+        self.resolution_wavenumber_input.setFixedWidth(input_width)
         self.resolution_wavenumber_label = QLabel("Resolution Wavenumber (cm-1)")
-        resolution_wavenumber_layout.addWidget(self.resolution_wavenumber_input)
-        resolution_wavenumber_layout.addWidget(self.resolution_wavenumber_label)
-        input_layout.addLayout(resolution_wavenumber_layout)
+        input_layout.addRow(self.resolution_wavenumber_label, self.resolution_wavenumber_input)
 
         # Window to print the progress of the lookuptable generation
         self.progress_window = QLineEdit()
         self.progress_window.setReadOnly(True)
-        input_layout.addWidget(self.progress_window)
+        input_layout.addRow(QLabel("Progress"), self.progress_window)
 
         # Button to start the lookup table generation
         self.generate_button = QPushButton("Generate Lookuptable")
-        input_layout.addWidget(self.generate_button)
+        input_layout.addRow(self.generate_button)
 
         # Display the input group box
         input_group_box.setLayout(input_layout)
@@ -446,6 +425,9 @@ class GUI(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder_path:
             self.data_path_input.setText(folder_path)
+
+    def fiting_data(self):
+        pass    
 
 # Run the application
 app = QApplication(sys.argv)

@@ -1,0 +1,11 @@
+name: spectra_data_generator
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pyqt=5.*
+  - matplotlib
+  - pip
+  - pip:
+    - numpy
+    - scipy
