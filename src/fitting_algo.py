@@ -29,7 +29,7 @@ plt.rcParams.update({"mathtext.default": "regular"})
 start_time = time.time()
 
 # File paths
-directory_path = r"C:\Users\nicog\OneDrive\Desktop\data for graphing\stuff_for _data_fitting"
+directory_path = r"D:\FLARE\data\Nico burn meas"
 lookup_table_path = r"src/methane_absorption_multiple_conditions.csv"
 file_list = glob.glob(os.path.join(directory_path, "*.cor"))
 
@@ -77,6 +77,10 @@ def get_spectral_data_from_csv(lookup_table, temperature, mole_fraction, x_wvn):
 # Number of files to process
 n = min(10, len(file_list))  # Limit processing to 10 files
 
+# Default parameters (update these as needed)
+DEFAULT_TEMPERATURE = 298  # Default temperature in K
+DEFAULT_MOLE_FRACTION = 0.1  # Default mole fraction
+
 for i in range(n):
     try:
         filepath = file_list[i]
@@ -85,9 +89,19 @@ for i in range(n):
         # Load the data file
         daq_file = pldspectrapy.open_daq_files(filepath)
 
-        # Extract metadata or set defaults
-        temperature = daq_file.metadata.get("temperature", 298)  # Default: 298 K
-        mole_fraction = daq_file.metadata.get("mole_fraction", 0.1)  # Default: 0.1
+        # Extract temperature and mole fraction from the file or use defaults
+        # If metadata is not embedded, rely on defaults
+        try:
+            temperature = daq_file.get_temperature()  # Replace with actual method if available
+        except AttributeError:
+            print(f"Temperature metadata not found. Using default: {DEFAULT_TEMPERATURE} K")
+            temperature = DEFAULT_TEMPERATURE
+
+        try:
+            mole_fraction = daq_file.get_mole_fraction()  # Replace with actual method if available
+        except AttributeError:
+            print(f"Mole fraction metadata not found. Using default: {DEFAULT_MOLE_FRACTION}")
+            mole_fraction = DEFAULT_MOLE_FRACTION
 
         # Prepare the file for processing
         daq_file.prep_for_processing()
