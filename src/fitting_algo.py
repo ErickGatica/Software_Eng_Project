@@ -89,22 +89,15 @@ for i in range(n):
         # Load the data file
         daq_file = pldspectrapy.open_daq_files(filepath)
 
-        # Extract temperature and mole fraction from the file or use defaults
-        # If metadata is not embedded, rely on defaults
-        try:
-            temperature = daq_file.get_temperature()  # Replace with actual method if available
-        except AttributeError:
-            print(f"Temperature metadata not found. Using default: {DEFAULT_TEMPERATURE} K")
-            temperature = DEFAULT_TEMPERATURE
+        # Extract temperature and mole fraction or use defaults
+        temperature = DEFAULT_TEMPERATURE
+        mole_fraction = DEFAULT_MOLE_FRACTION
 
-        try:
-            mole_fraction = daq_file.get_mole_fraction()  # Replace with actual method if available
-        except AttributeError:
-            print(f"Mole fraction metadata not found. Using default: {DEFAULT_MOLE_FRACTION}")
-            mole_fraction = DEFAULT_MOLE_FRACTION
+        # Pass minimal configuration to `prep_for_processing`
+        minimal_config = {"temperature": temperature, "mole_fraction": mole_fraction}
 
         # Prepare the file for processing
-        daq_file.prep_for_processing()
+        daq_file.prep_for_processing(minimal_config)
 
         # Generate spectrum from the `.cor` file
         x_wvn, transmission = pldspectrapy.td_support.create_spectrum(daq_file)
