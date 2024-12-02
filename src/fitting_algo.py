@@ -107,7 +107,7 @@ for i in range(n):
 
         # Perform fitting using the lookup table spectrum
         Fit = fit_data(x_wvn, spectral_data)
-
+#
         # Optionally, save results or generate output
         print(Fit.fit_report())
 
