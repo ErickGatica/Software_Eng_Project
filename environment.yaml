@@ -10,3 +10,6 @@ dependencies:
   - pip:
     - numpy
     - scipy
+    - hitran-api
+    - lmfit
+    - PyQt5

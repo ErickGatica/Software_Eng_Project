@@ -13,6 +13,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFileDialog, QPushButton
+from PyQt5.QtWidgets import QMessageBox
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -219,7 +220,7 @@ class GUI(QMainWindow):
         self.data_path_input.setFixedWidth(input_width)
         self.data_path_label = QLabel("Data Path")
         self.data_path_button = QPushButton("Browse")
-        self.data_path_button.clicked.connect(self.browse_folder)
+        self.data_path_button.clicked.connect(lambda: self.browse_folder(self.data_path_input))
         data_path_layout = QHBoxLayout()
         data_path_layout.addWidget(self.data_path_input)
         data_path_layout.addWidget(self.data_path_button)
@@ -236,6 +237,7 @@ class GUI(QMainWindow):
         self.results_path_input.setFixedWidth(input_width)
         self.results_path_label = QLabel("Results Path")
         self.results_path_button = QPushButton("Browse")
+        self.results_path_button.clicked.connect(lambda: self.browse_folder(self.results_path_input))
         results_path_layout = QHBoxLayout()
         results_path_layout.addWidget(self.results_path_input)
         results_path_layout.addWidget(self.results_path_button)
@@ -258,6 +260,7 @@ class GUI(QMainWindow):
         self.linelist_path_input.setFixedWidth(input_width)
         self.linelist_path_label = QLabel("Linelist Path")
         self.linelist_path_button = QPushButton("Browse")
+        self.linelist_path_button.clicked.connect(lambda: self.browse_folder(self.linelist_path_input))
         linelist_path_layout = QHBoxLayout()
         linelist_path_layout.addWidget(self.linelist_path_input)
         linelist_path_layout.addWidget(self.linelist_path_button)
@@ -395,36 +398,45 @@ class GUI(QMainWindow):
 
 
     def generate_absorption_spectra(self):
-        molecule = self.molecule_input.currentText()
-        # Molecule Id and isotopologue have to be a number
-        molecule_id = molecule_id_dict[molecule]
-        isotopologue = int(self.isotopologue_input.currentText())
-        T = float(self.temp_input.text())
-        P = float(self.pressure_input.text())
-        molar = float(self.molar_fraction_input.text())
-        length = float(self.length_input.text())
-        wavenumber_min = float(self.wavenumber_min_input.text())
-        wavenumber_max = float(self.wavenumber_max_input.text())
-        wavestep = float(self.wavenumber_step_input.text())
-        method_ = self.method_input.currentText()
-        # Generating the absorption spectra
-        data = spectrum(P,T,length,wavenumber_min,wavenumber_max,molecule_id,isotopologue,method_,wavestep,molar)
-        # Plotting the absorption spectra in the canvas of the window
-        ax = self.plot_canvas.figure.gca()
-        plot_spectra(ax,data)
-        self.plot_canvas.draw()
-        print("Generating absorption spectra...")
-    
+        try: 
+            molecule = self.molecule_input.currentText()
+            # Molecule Id and isotopologue have to be a number
+            molecule_id = molecule_id_dict[molecule]
+            isotopologue = int(self.isotopologue_input.currentText())
+            T = float(self.temp_input.text())
+            print(self.pressure_input.text())
+            P = float(self.pressure_input.text())
+            print(P)
+            molar = float(self.molar_fraction_input.text())
+            length = float(self.length_input.text())
+            wavenumber_min = float(self.wavenumber_min_input.text())
+            wavenumber_max = float(self.wavenumber_max_input.text())
+            wavestep = float(self.wavenumber_step_input.text())
+            method_ = self.method_input.currentText()
+            # Generating the absorption spectra
+            data = spectrum(P,T,length,wavenumber_min,wavenumber_max,molecule_id,isotopologue,method_,wavestep,molar)
+            # Plotting the absorption spectra in the canvas of the window
+            ax = self.plot_canvas.figure.gca()
+            plot_spectra(ax,data)
+            self.plot_canvas.draw()
+            print("Generating absorption spectra...")
+        except ValueError as e:
+            QMessageBox.critical(self, "Input Error", f"Invalid input: {e}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {e}")
+
+
     def clear_plot(self):
         ax = self.plot_canvas.figure.gca()
         ax.clear()
         self.plot_canvas.draw()
         print("Plot cleared.")
     
-    def browse_folder(self):
+    def browse_folder(self, target_input):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder_path:
-            self.data_path_input.setText(folder_path)
+            target_input.setText(folder_path)
+
 
     def fiting_data(self):
         pass    
