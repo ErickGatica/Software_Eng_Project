@@ -68,4 +68,44 @@ def get_spectral_data_from_csv(lookup_table, temperature, mole_fraction, x_wvn):
     if matching_rows.empty:
         raise ValueError(f"No matching data for T={temperature}, mole_fraction={mole_fraction}.")
 
-    # Interpolate data for the provided w
+    # Interpolate data for the provided wavenumbers
+    spectral_data = np.interp(
+        x_wvn, matching_rows["Wavenumber (cm⁻¹)"], matching_rows["Absorption Coefficient"]
+    )
+    return spectral_data
+
+# Number of files to process
+n = min(10, len(file_list))  # Limit processing to 10 files
+
+for i in range(n):
+    try:
+        filepath = file_list[i]
+        print(f"Processing file: {filepath}")
+
+        # Load the data file
+        daq_file = pldspectrapy.open_daq_files(filepath)
+
+        # Extract metadata or set defaults
+        temperature = daq_file.metadata.get("temperature", 298)  # Default: 298 K
+        mole_fraction = daq_file.metadata.get("mole_fraction", 0.1)  # Default: 0.1
+
+        # Prepare the file for processing
+        daq_file.prep_for_processing()
+
+        # Generate spectrum from the `.cor` file
+        x_wvn, transmission = pldspectrapy.td_support.create_spectrum(daq_file)
+
+        # Retrieve spectral data from the lookup table
+        spectral_data = get_spectral_data_from_csv(lookup_table, temperature, mole_fraction, x_wvn)
+
+        # Perform fitting using the lookup table spectrum
+        Fit = fit_data(x_wvn, spectral_data)
+
+        # Optionally, save results or generate output
+        print(Fit.fit_report())
+
+    except Exception as e:
+        print(f"Error processing file {filepath}: {e}")
+
+end_time = time.time()
+print(f"Elapsed time: {end_time - start_time}")
