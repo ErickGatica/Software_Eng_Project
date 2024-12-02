@@ -93,11 +93,8 @@ for i in range(n):
         temperature = DEFAULT_TEMPERATURE
         mole_fraction = DEFAULT_MOLE_FRACTION
 
-        # Pass minimal configuration to `prep_for_processing`
-        minimal_config = {"temperature": temperature, "mole_fraction": mole_fraction}
-
         # Prepare the file for processing
-        daq_file.prep_for_processing(minimal_config)
+        daq_file.prep_for_processing()
 
         # Generate spectrum from the `.cor` file
         x_wvn, transmission = pldspectrapy.td_support.create_spectrum(daq_file)
@@ -107,8 +104,14 @@ for i in range(n):
 
         # Perform fitting using the lookup table spectrum
         Fit = fit_data(x_wvn, spectral_data)
-#
+
         # Optionally, save results or generate output
+        results_df = pldspectrapy.config_handling.generate_output_and_save(Fit, {"results_path": "results", "filename": f"{i}_results.csv"})
+
+        if create_plots:
+            pldspectrapy.plotting_tools.plot_fit_td(Fit, {"plot_name": f"plot_{i}_time"})
+            pldspectrapy.plotting_tools.plot_fit_freq(Fit, {"plot_name": f"plot_{i}_freq"})
+
         print(Fit.fit_report())
 
     except Exception as e:
