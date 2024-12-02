@@ -80,6 +80,7 @@ n = min(10, len(file_list))  # Limit processing to 10 files
 # Default parameters (update these as needed)
 DEFAULT_TEMPERATURE = 298  # Default temperature in K
 DEFAULT_MOLE_FRACTION = 0.1  # Default mole fraction
+CREATE_PLOTS = True  # Enable or disable plotting
 
 for i in range(n):
     try:
@@ -94,7 +95,7 @@ for i in range(n):
         mole_fraction = DEFAULT_MOLE_FRACTION
 
         # Prepare the file for processing
-        daq_file.prep_for_processing()
+        daq_file.prep_for_processing({"temperature": temperature, "mole_fraction": mole_fraction})
 
         # Generate spectrum from the `.cor` file
         x_wvn, transmission = pldspectrapy.td_support.create_spectrum(daq_file)
@@ -105,10 +106,12 @@ for i in range(n):
         # Perform fitting using the lookup table spectrum
         Fit = fit_data(x_wvn, spectral_data)
 
-        # Optionally, save results or generate output
-        results_df = pldspectrapy.config_handling.generate_output_and_save(Fit, {"results_path": "results", "filename": f"{i}_results.csv"})
+        # Save results
+        results_path = f"results/result_{i}.csv"
+        results_df = pldspectrapy.config_handling.generate_output_and_save(Fit, {"results_path": results_path})
 
-        if create_plots:
+        # Optionally, plot results
+        if CREATE_PLOTS:
             pldspectrapy.plotting_tools.plot_fit_td(Fit, {"plot_name": f"plot_{i}_time"})
             pldspectrapy.plotting_tools.plot_fit_freq(Fit, {"plot_name": f"plot_{i}_freq"})
 
