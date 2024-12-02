@@ -189,11 +189,11 @@ class GUI(QMainWindow):
         plt.style.use('dark_background')
 
         # Placeholder for the plot area
-        self.plot_canvas = FigureCanvas(Figure())
-        self.toolbar = NavigationToolbar(self.plot_canvas, self)
+        self.absorption_plot_canvas = FigureCanvas(Figure())
+        self.toolbar = NavigationToolbar(self.absorption_plot_canvas, self)
         plot_layout = QVBoxLayout()
         plot_layout.addWidget(self.toolbar)
-        plot_layout.addWidget(self.plot_canvas)
+        plot_layout.addWidget(self.absorption_plot_canvas)
         plot_frame = QFrame()
         plot_frame.setLayout(plot_layout)
         splitter.addWidget(plot_frame)
@@ -280,11 +280,11 @@ class GUI(QMainWindow):
         plt.style.use('dark_background')
 
         # Placeholder for the plot area
-        self.plot_canvas = FigureCanvas(Figure())
-        self.toolbar = NavigationToolbar(self.plot_canvas, self)
+        self.fitting_plot_canvas = FigureCanvas(Figure())
+        self.toolbar = NavigationToolbar(self.fitting_plot_canvas, self)
         plot_layout = QVBoxLayout()
         plot_layout.addWidget(self.toolbar)
-        plot_layout.addWidget(self.plot_canvas)
+        plot_layout.addWidget(self.fitting_plot_canvas)
         plot_frame = QFrame()
         plot_frame.setLayout(plot_layout)
         splitter.addWidget(plot_frame)
@@ -295,7 +295,6 @@ class GUI(QMainWindow):
         # Set the main layout for the fitting tab
         self.fitting_tab.setLayout(main_layout)
 
-
     def init_lookuptable_tab(self):
         # Create the main layout for the lookuptable tab
         main_layout = QVBoxLayout()
@@ -303,7 +302,7 @@ class GUI(QMainWindow):
         # Create a splitter for resizable input and plot areas
         splitter = QSplitter(Qt.Horizontal)
 
-       # Group for inputs
+        # Group for inputs
         input_group_box = QGroupBox("Input Parameters")
         input_layout = QFormLayout()
 
@@ -347,10 +346,10 @@ class GUI(QMainWindow):
         input_layout.addRow(self.resolution_mole_fraction_label, self.resolution_mole_fraction_input)
 
         # Pressure for Lookuptable
-        self.pressure_input = QLineEdit()
-        self.pressure_input.setFixedWidth(input_width)
-        self.pressure_label = QLabel("Pressure (atm)")
-        input_layout.addRow(self.pressure_label, self.pressure_input)
+        self.lookup_pressure_input = QLineEdit()
+        self.lookup_pressure_input.setFixedWidth(input_width)
+        self.lookup_pressure_label = QLabel("Pressure (atm)")
+        input_layout.addRow(self.lookup_pressure_label, self.lookup_pressure_input)
 
         # Shift range +- this value
         self.shift_range_input = QLineEdit()
@@ -389,54 +388,79 @@ class GUI(QMainWindow):
         input_group_box.setLayout(input_layout)
         splitter.addWidget(input_group_box)
 
+        # Apply dark background style globally
+        plt.style.use('dark_background')
+
+        # Placeholder for the plot area
+        self.lookup_plot_canvas = FigureCanvas(Figure())
+        self.toolbar = NavigationToolbar(self.lookup_plot_canvas, self)
+        plot_layout = QVBoxLayout()
+        plot_layout.addWidget(self.toolbar)
+        plot_layout.addWidget(self.lookup_plot_canvas)
+        plot_frame = QFrame()
+        plot_frame.setLayout(plot_layout)
+        splitter.addWidget(plot_frame)
+
         # Add the splitter to the main layout
         main_layout.addWidget(splitter)
 
         # Set the main layout for the lookuptable tab
         self.lookuptable_tab.setLayout(main_layout)
-        
-
 
     def generate_absorption_spectra(self):
-        try: 
+        try:
             molecule = self.molecule_input.currentText()
             # Molecule Id and isotopologue have to be a number
             molecule_id = molecule_id_dict[molecule]
             isotopologue = int(self.isotopologue_input.currentText())
-            T = float(self.temp_input.text())
-            print(self.pressure_input.text())
-            P = float(self.pressure_input.text())
-            print(P)
-            molar = float(self.molar_fraction_input.text())
-            length = float(self.length_input.text())
-            wavenumber_min = float(self.wavenumber_min_input.text())
-            wavenumber_max = float(self.wavenumber_max_input.text())
-            wavestep = float(self.wavenumber_step_input.text())
+
+            # Validate and convert input values
+            T = self.validate_input(self.temp_input, "Temperature")
+            P = self.validate_input(self.pressure_input, "Pressure")
+            molar = self.validate_input(self.molar_fraction_input, "Molar Fraction")
+            length = self.validate_input(self.length_input, "Path Length")
+            wavenumber_min = self.validate_input(self.wavenumber_min_input, "Minimum Wavenumber")
+            wavenumber_max = self.validate_input(self.wavenumber_max_input, "Maximum Wavenumber")
+            wavestep = self.validate_input(self.wavenumber_step_input, "Wavenumber Step")
             method_ = self.method_input.currentText()
+
+            print(f"Temperature: {T}, Pressure: {P}, Molar Fraction: {molar}, Path Length: {length}")
+            print(f"Minimum Wavenumber: {wavenumber_min}, Maximum Wavenumber: {wavenumber_max}, Wavenumber Step: {wavestep}")
+
             # Generating the absorption spectra
-            data = spectrum(P,T,length,wavenumber_min,wavenumber_max,molecule_id,isotopologue,method_,wavestep,molar)
+            data = spectrum(P, T, length, wavenumber_min, wavenumber_max, molecule_id, isotopologue, method_, wavestep, molar)
             # Plotting the absorption spectra in the canvas of the window
-            ax = self.plot_canvas.figure.gca()
-            plot_spectra(ax,data)
-            self.plot_canvas.draw()
+            ax = self.absorption_plot_canvas.figure.gca()
+            plot_spectra(ax, data)
+            self.absorption_plot_canvas.figure.tight_layout()  # Adjust the layout
+            self.absorption_plot_canvas.draw()
             print("Generating absorption spectra...")
+
         except ValueError as e:
             QMessageBox.critical(self, "Input Error", f"Invalid input: {e}")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {e}")
 
+    def validate_input(self, input_field, field_name):
+        value = input_field.text()
+        print(f"Validating {field_name}: '{value}'")  # Debug statement
+        if not value:
+            raise ValueError(f"{field_name} cannot be empty.")
+        try:
+            return float(value)
+        except ValueError:
+            raise ValueError(f"{field_name} must be a valid number.")
 
     def clear_plot(self):
-        ax = self.plot_canvas.figure.gca()
+        ax = self.absorption_plot_canvas.figure.gca()
         ax.clear()
-        self.plot_canvas.draw()
+        self.absorption_plot_canvas.draw()
         print("Plot cleared.")
     
     def browse_folder(self, target_input):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder_path:
             target_input.setText(folder_path)
-
 
     def fiting_data(self):
         pass    
