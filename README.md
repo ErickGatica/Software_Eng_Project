@@ -24,3 +24,28 @@ Our software is designed to be a flexible and user-friendly tool for the spectro
 
 # Installation
 
+Clone the repo using git:
+
+```bash
+git clone https://github.com/ErickGatica/Software_Eng_Project.git
+```
+
+
+# Environment
+
+To set the environment to work with this repo. In the folder where the repo was cloned:
+
+```bash
+conda env create -f environment.yaml
+```
+
+Then, activate the environment:
+
+```bash 
+conda activate spectra_data_generator
+```
+
+
+
+
+

@@ -1,0 +1,15 @@
+name: spectra_software
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pyqt=5.*
+  - matplotlib
+  - pandas
+  - pip
+  - pip:
+    - numpy
+    - scipy
+    - hitran-api
+    - lmfit
+    - PyQt5
