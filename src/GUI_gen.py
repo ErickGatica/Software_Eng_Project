@@ -13,7 +13,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFileDialog, QPushButton
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QCheckBox
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -172,6 +172,10 @@ class GUI(QMainWindow):
         self.method_label = QLabel("Method")
         input_layout.addRow(self.method_label, self.method_input)
 
+        # Apply dark background style globally
+        plt.style.use('dark_background')
+
+
         # Generate button
         self.generate_button = QPushButton("Generate Absorption Spectra")
         self.generate_button.clicked.connect(self.generate_absorption_spectra)
@@ -182,11 +186,14 @@ class GUI(QMainWindow):
         self.clear_button.clicked.connect(self.clear_plot)
         input_layout.addRow(self.clear_button)
 
+        # Save button
+        self.save_button = QPushButton("Save Data")
+        self.save_button.clicked.connect(self.save_data)
+        input_layout.addRow(self.save_button)
+
         input_group_box.setLayout(input_layout)
         splitter.addWidget(input_group_box)
 
-        # Apply dark background style globally
-        plt.style.use('dark_background')
 
         # Placeholder for the plot area
         self.absorption_plot_canvas = FigureCanvas(Figure())
@@ -440,6 +447,9 @@ class GUI(QMainWindow):
             QMessageBox.critical(self, "Input Error", f"Invalid input: {e}")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {e}")
+        
+        # Returning data for further use
+        return data
 
     def validate_input(self, input_field, field_name):
         value = input_field.text()
@@ -461,6 +471,19 @@ class GUI(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder_path:
             target_input.setText(folder_path)
+
+    # Function to save the absorption data of the plot in a text file
+    def save_data(self, data):
+        nu = data.nu
+        absorption = data.absorption
+        label = str(data.molecule) + "_" + str(data.isotopologue) + "_" + str(data.T) + "_" + str(data.P) + "_" + str(data.molar) + "_" + str(data.length) + "_" + str(data.method) 
+        with open("absorption_data.txt", "w") as f:
+            for i in range(len(nu)):
+                if i == 1:
+                    f.write(f"labels\t{label}\n")
+                else:
+                    f.write(f"{nu[i]}\t{absorption[i]}\n")
+
 
     def fiting_data(self):
         pass    
