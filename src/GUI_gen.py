@@ -18,10 +18,12 @@ from PyQt5.QtWidgets import QMessageBox, QCheckBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-
+import numpy as np
 # Importing the functions from the Abs_gen.py script
 from Abs_gen import spectrum, plot_spectra
 
+# Importing funtion to generate Lookuptable
+from h6py_lookuptABLE_NICO_gen import create_lookup_table
 
 # Importing the variables from the Variables.py script
 # from Variables import args
@@ -274,7 +276,7 @@ class GUI(QMainWindow):
         input_layout.addRow(self.linelist_path_label, linelist_path_layout)
 
         # Fitting button
-        self.fitting_button = QPushButton("Fit Data")
+        self.fitting_button = QPushButton("Fit Data Lookuptable")
         input_layout.addRow(self.fitting_button)
 
         # Display the input group box
@@ -282,10 +284,75 @@ class GUI(QMainWindow):
         self.fitting_button.clicked.connect(self.fiting_data)
         splitter.addWidget(input_group_box)
 
+        # Group for fitting progress inputs
+        fitting_progress_group_box = QGroupBox("Fitting Progress")
+        fitting_progress_layout = QFormLayout()
+
+        # Data path
+        self.data_path_input_fp = QLineEdit()
+        self.data_path_input_fp.setFixedWidth(input_width)
+        self.data_path_label_fp = QLabel("Data Path")
+        self.data_path_button_fp = QPushButton("Browse")
+        self.data_path_button_fp.clicked.connect(lambda: self.browse_folder(self.data_path_input_fp))
+        data_path_layout_fp = QHBoxLayout()
+        data_path_layout_fp.addWidget(self.data_path_input_fp)
+        data_path_layout_fp.addWidget(self.data_path_button_fp)
+        fitting_progress_layout.addRow(self.data_path_label_fp, data_path_layout_fp)
+
+        # Filename
+        self.filename_input_fp = QLineEdit()
+        self.filename_input_fp.setFixedWidth(input_width)
+        self.filename_label_fp = QLabel("Filename")
+        fitting_progress_layout.addRow(self.filename_label_fp, self.filename_input_fp)
+
+        # Results path
+        self.results_path_input_fp = QLineEdit()
+        self.results_path_input_fp.setFixedWidth(input_width)
+        self.results_path_label_fp = QLabel("Results Path")
+        self.results_path_button_fp = QPushButton("Browse")
+        self.results_path_button_fp.clicked.connect(lambda: self.browse_folder(self.results_path_input_fp))
+        results_path_layout_fp = QHBoxLayout()
+        results_path_layout_fp.addWidget(self.results_path_input_fp)
+        results_path_layout_fp.addWidget(self.results_path_button_fp)
+        fitting_progress_layout.addRow(self.results_path_label_fp, results_path_layout_fp)
+
+        # Results filename
+        self.results_filename_input_fp = QLineEdit()
+        self.results_filename_input_fp.setFixedWidth(input_width)
+        self.results_filename_label_fp = QLabel("Results Filename")
+        fitting_progress_layout.addRow(self.results_filename_label_fp, self.results_filename_input_fp)
+
+        # Plot name
+        self.plot_name_input_fp = QLineEdit()
+        self.plot_name_input_fp.setFixedWidth(input_width)
+        self.plot_name_label_fp = QLabel("Plot Name")
+        fitting_progress_layout.addRow(self.plot_name_label_fp, self.plot_name_input_fp)
+
+        # Linelist path
+        self.linelist_path_input_fp = QLineEdit()
+        self.linelist_path_input_fp.setFixedWidth(input_width)
+        self.linelist_path_label_fp = QLabel("Linelist Path")
+        self.linelist_path_button_fp = QPushButton("Browse")
+        self.linelist_path_button_fp.clicked.connect(lambda: self.browse_folder(self.linelist_path_input_fp))
+        linelist_path_layout_fp = QHBoxLayout()
+        linelist_path_layout_fp.addWidget(self.linelist_path_input_fp)
+        linelist_path_layout_fp.addWidget(self.linelist_path_button_fp)
+        fitting_progress_layout.addRow(self.linelist_path_label_fp, linelist_path_layout_fp)
+
+        # Fitting progress button
+        self.fitting_progress_button = QPushButton("Fit Data HAPI")
+        fitting_progress_layout.addRow(self.fitting_progress_button)
+
+        # Display the fitting progress group box
+        fitting_progress_group_box.setLayout(fitting_progress_layout)
+        self.fitting_progress_button.clicked.connect(self.fit_data_hapi)
+        splitter.addWidget(fitting_progress_group_box)
+
         # Creating canvas to plot fit and experimental data
         # Apply dark background style globally
         plt.style.use('dark_background')
 
+        '''
         # Placeholder for the plot area
         self.fitting_plot_canvas = FigureCanvas(Figure())
         self.toolbar = NavigationToolbar(self.fitting_plot_canvas, self)
@@ -295,12 +362,15 @@ class GUI(QMainWindow):
         plot_frame = QFrame()
         plot_frame.setLayout(plot_layout)
         splitter.addWidget(plot_frame)
-
+        '''
         # Add the splitter to the main layout
         main_layout.addWidget(splitter)
+        
 
         # Set the main layout for the fitting tab
         self.fitting_tab.setLayout(main_layout)
+
+
 
     def init_lookuptable_tab(self):
         # Create the main layout for the lookuptable tab
@@ -315,6 +385,13 @@ class GUI(QMainWindow):
 
         # Set a fixed width for the input boxes
         input_width = 200
+
+        # Molecule for Lookuptable generation
+        self.molecule1_lookup_input = QComboBox()
+        self.molecule1_lookup_input.addItems(["H2O", "CO2", "CO", "N2", "O2", "CH4", "H2", "NO", "NO2"])
+        self.molecule1_lookup_input.setFixedWidth(input_width)
+        self.molecule1_lookup_label = QLabel("Molecule:")
+        input_layout.addRow(self.molecule1_lookup_label, self.molecule1_lookup_input)
 
         # Min temperature for Lookuptable
         self.min_temp_input = QLineEdit()
@@ -357,6 +434,13 @@ class GUI(QMainWindow):
         self.lookup_pressure_input.setFixedWidth(input_width)
         self.lookup_pressure_label = QLabel("Pressure (atm)")
         input_layout.addRow(self.lookup_pressure_label, self.lookup_pressure_input)
+        
+        # Path length for Lookuptable
+        self.lookup_length_input = QLineEdit()
+        self.lookup_length_input.setFixedWidth(input_width)
+        self.lookup_length_label = QLabel("Path Length (cm)")
+        input_layout.addRow(self.lookup_length_label, self.lookup_length_input)
+
 
         # Shift range +- this value
         self.shift_range_input = QLineEdit()
@@ -382,14 +466,24 @@ class GUI(QMainWindow):
         self.resolution_wavenumber_label = QLabel("Resolution Wavenumber (cm-1)")
         input_layout.addRow(self.resolution_wavenumber_label, self.resolution_wavenumber_input)
 
+        # Input of the name for the csv file 
+        self.csv_name_input = QLineEdit()
+        self.csv_name_input.setFixedWidth(input_width)
+        self.csv_name_label = QLabel("Name of the csv file")
+        input_layout.addRow(self.csv_name_label, self.csv_name_input)
+
+
         # Window to print the progress of the lookuptable generation
         self.progress_window = QLineEdit()
         self.progress_window.setReadOnly(True)
         input_layout.addRow(QLabel("Progress"), self.progress_window)
 
         # Button to start the lookup table generation
-        self.generate_button = QPushButton("Generate Lookuptable")
-        input_layout.addRow(self.generate_button)
+        self.generate1_button = QPushButton("Generate Lookuptable")
+        self.generate1_button.clicked.connect(self.generate_lookuptable)
+        input_layout.addRow(self.generate1_button)
+    
+
 
         # Display the input group box
         input_group_box.setLayout(input_layout)
@@ -484,9 +578,47 @@ class GUI(QMainWindow):
                 else:
                     f.write(f"{nu[i]}\t{absorption[i]}\n")
 
+    def update_progress(self, message):
+        self.progress_window.setText(message)
+
+
+    def generate_lookuptable(self):
+        # Creating dictionary with the parameters that create_lookup_table needs
+        params ={
+            "molecule_name": self.molecule1_lookup_input.currentText(),
+            "hitran_id": molecule_id_dict[self.molecule1_lookup_input.currentText()],   
+            "isotopologue_id": 1,
+            "wavenumber_start": float(self.min_wavenumber_input.text()),
+            "wavenumber_end": float(self.max_wavenumber_input.text()),
+            "mole_fraction_start": float(self.min_mole_fraction_input.text()),
+            "mole_fraction_end": float(self.max_mole_fraction_input.text()),
+            "mole_fraction_resolution": float(self.resolution_mole_fraction_input.text()),
+            "mole_fractions": np.arange(float(self.min_mole_fraction_input.text()), float(self.max_mole_fraction_input.text()), float(self.resolution_mole_fraction_input.text())),
+            "min_temperature": float(self.min_temp_input.text()),
+            "max_temperature": float(self.max_temp_input.text()),
+            "temperature_resolution": float(self.resolution_temp_input.text()),
+            "temperatures": np.arange(float(self.min_temp_input.text()), float(self.max_temp_input.text()), float(self.resolution_temp_input.text())),
+            "pressure": float(self.lookup_pressure_input.text()),  
+            "pathlength": float(self.lookup_length_input.text()),
+            "spectral_shift": float(self.shift_range_input.text()),
+            "fit_start": float(self.min_wavenumber_input.text()),
+            "fit_end": float(self.max_wavenumber_input.text()),
+            "wavenumber_array": np.linspace(float(self.min_wavenumber_input.text()), float(self.max_wavenumber_input.text()), 500),
+            "output_csv_file": self.csv_name_input.text(),
+        }
+        
+        self.update_progress("Generating.")
+        # Generate the lookup table
+        create_lookup_table(params)
+        self.update_progress("Successfully.")
+
+
 
     def fiting_data(self):
         pass    
+
+    def fit_data_hapi(self):
+        pass
 
 # Run the application
 app = QApplication(sys.argv)
