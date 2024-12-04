@@ -516,7 +516,7 @@ class GUI(QMainWindow):
         # Display the input group box
         input_group_box.setLayout(input_layout)
 
-        '''
+        
         # Group for sliders
         sliders_group_box = QGroupBox("Plot Parameters")
         sliders_layout = QFormLayout()
@@ -555,12 +555,12 @@ class GUI(QMainWindow):
 
         # Set layout for the sliders group box
         sliders_group_box.setLayout(sliders_layout)
-        '''
+        
 
         # Layout to stack the input parameters and sliders group boxes vertically
         input_and_sliders_layout = QVBoxLayout()
         input_and_sliders_layout.addWidget(input_group_box)
-        #input_and_sliders_layout.addWidget(sliders_group_box) # TO DO
+        input_and_sliders_layout.addWidget(sliders_group_box) # TO DO
 
         # Container widget for input and sliders
         input_container = QFrame()
@@ -733,8 +733,9 @@ class GUI(QMainWindow):
         config_path = self.config_file_input_fp.text()
         config_variables = load_configuration(config_path)
         # Initialize HAPI database if necessary
-        initialize_hapi_db(config_variables)
+        #initialize_hapi_db(config_variables)
         # Process files
+        print("The path file:" + self.data_path_input_fp.text())
         process_file(self.data_path_input_fp.text(), config_variables)
         # Once its done print Successfully in the window
         self.window_fitting_hapi.setText("Successfully.")

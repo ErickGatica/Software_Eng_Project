@@ -799,7 +799,7 @@ def initialize_hapi_db(hapi_path):
         raise FileNotFoundError("No .data or .par files found in linelists directory")
 
     pldhapi.db_begin(hapi_path)
-    hapi2.hapi.db_begin(hapi_path)
+    #hapi2.hapi.db_begin(hapi_path)
 
 
 def fit_data(

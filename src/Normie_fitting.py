@@ -43,7 +43,7 @@ def process_file(filepath, config_variables):
         print(f"Processing file: {filepath}")
 
         # Update configuration with the current file path
-        config_variables["input"]["filename"] = filepath
+        #config_variables["input"]["filename"] = filepath
 
         # Load the data file
         daq_file = pldspectrapy.open_daq_files(filepath)
