@@ -24,7 +24,8 @@ from Abs_gen import spectrum, plot_spectra
 
 # Importing funtion to generate Lookuptable
 from h6py_lookuptABLE_NICO_gen import create_lookup_table
-
+from Normie_fitting import configure_plots, load_configuration, initialize_hapi_db
+from Normie_fitting import process_file, plot_results
 # Importing the variables from the Variables.py script
 # from Variables import args
 # from Variables import args_dict
@@ -189,10 +190,12 @@ class GUI(QMainWindow):
         input_layout.addRow(self.clear_button)
 
         # Save button
+        '''
         self.save_button = QPushButton("Save Data")
         self.save_button.clicked.connect(self.save_data)
         input_layout.addRow(self.save_button)
-
+        '''
+        
         input_group_box.setLayout(input_layout)
         splitter.addWidget(input_group_box)
 
@@ -293,16 +296,7 @@ class GUI(QMainWindow):
         fitting_progress_group_box = QGroupBox("Fitting Results")
         fitting_progress_layout = QFormLayout()
 
-        # Data path
-        self.data_path_input_fp = QLineEdit()
-        self.data_path_input_fp.setFixedWidth(input_width)
-        self.data_path_label_fp = QLabel("Data Path")
-        self.data_path_button_fp = QPushButton("Browse")
-        self.data_path_button_fp.clicked.connect(lambda: self.browse_folder(self.data_path_input_fp))
-        data_path_layout_fp = QHBoxLayout()
-        data_path_layout_fp.addWidget(self.data_path_input_fp)
-        data_path_layout_fp.addWidget(self.data_path_button_fp)
-        fitting_progress_layout.addRow(self.data_path_label_fp, data_path_layout_fp)
+        '''
 
         # Filename
         self.filename_input_fp = QLineEdit()
@@ -343,6 +337,31 @@ class GUI(QMainWindow):
         linelist_path_layout_fp.addWidget(self.linelist_path_input_fp)
         linelist_path_layout_fp.addWidget(self.linelist_path_button_fp)
         fitting_progress_layout.addRow(self.linelist_path_label_fp, linelist_path_layout_fp)
+
+        '''
+
+        # Data path
+        self.data_path_input_fp = QLineEdit()
+        self.data_path_input_fp.setFixedWidth(input_width)
+        self.data_path_label_fp = QLabel("Data Path")
+        self.data_path_button_fp = QPushButton("Browse")
+        self.data_path_button_fp.clicked.connect(lambda: self.browse_file(self.data_path_input_fp))
+        data_path_layout_fp = QHBoxLayout()
+        data_path_layout_fp.addWidget(self.data_path_input_fp)
+        data_path_layout_fp.addWidget(self.data_path_button_fp)
+        fitting_progress_layout.addRow(self.data_path_label_fp, data_path_layout_fp)
+
+
+        # Config file path of the file 
+        self.config_file_input_fp = QLineEdit()
+        self.config_file_input_fp.setFixedWidth(input_width)
+        self.config_file_label_fp = QLabel("Config File Path")
+        self.config_file_button_fp = QPushButton("Browse")
+        self.config_file_button_fp.clicked.connect(lambda: self.browse_file(self.config_file_input_fp))
+        config_file_layout_fp = QHBoxLayout()
+        config_file_layout_fp.addWidget(self.config_file_input_fp)
+        config_file_layout_fp.addWidget(self.config_file_button_fp)
+        fitting_progress_layout.addRow(self.config_file_label_fp, config_file_layout_fp)
 
         # Fitting progress button
         self.fitting_progress_button = QPushButton("Fit Data HAPI")
@@ -625,6 +644,11 @@ class GUI(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder_path:
             target_input.setText(folder_path)
+    
+    def browse_file(self, target_input):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select File")
+        if file_path:
+            target_input.setText(file_path)
 
     # Function to save the absorption data of the plot in a text file
     def save_data(self, data):
@@ -703,7 +727,18 @@ class GUI(QMainWindow):
         pass    
 
     def fit_data_hapi(self):
-        pass
+        # Configure plot format
+        configure_plots()
+        # Load configuration
+        config_path = self.config_file_input_fp.text()
+        config_variables = load_configuration(config_path)
+        # Initialize HAPI database if necessary
+        initialize_hapi_db(config_variables)
+        # Process files
+        process_file(self.data_path_input_fp.text(), config_variables)
+        # Once its done print Successfully in the window
+        self.window_fitting_hapi.setText("Successfully.")
+        
 
 # Run the application
 app = QApplication(sys.argv)
