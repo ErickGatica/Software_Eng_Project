@@ -41,6 +41,7 @@ def create_lookup_table(params):
         Dictionary containing all necessary parameters for calculations.
     """
     # Initialize HAPI database
+    print("Initializing Lookup Table generation")
     db_begin("hapi_data")
 
     # Fetch methane data from HITRAN
