@@ -13,7 +13,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFileDialog, QPushButton
-from PyQt5.QtWidgets import QMessageBox, QCheckBox
+from PyQt5.QtWidgets import QMessageBox, QCheckBox, QSlider
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -284,8 +284,13 @@ class GUI(QMainWindow):
         self.fitting_button.clicked.connect(self.fiting_data)
         splitter.addWidget(input_group_box)
 
+        # Adding window to displayed the parameters of the fitting that were obtained
+        self.window_fitting = QLineEdit()
+        self.window_fitting.setReadOnly(True)
+        input_layout.addRow(QLabel("Fitting Progress"), self.window_fitting)
+
         # Group for fitting progress inputs
-        fitting_progress_group_box = QGroupBox("Fitting Progress")
+        fitting_progress_group_box = QGroupBox("Fitting Results")
         fitting_progress_layout = QFormLayout()
 
         # Data path
@@ -347,6 +352,12 @@ class GUI(QMainWindow):
         fitting_progress_group_box.setLayout(fitting_progress_layout)
         self.fitting_progress_button.clicked.connect(self.fit_data_hapi)
         splitter.addWidget(fitting_progress_group_box)
+
+        # Adding window to displayed the parameters of the fitting that were obtained
+        self.window_fitting_hapi = QLineEdit()
+        self.window_fitting_hapi.setReadOnly(True)
+        fitting_progress_layout.addRow(QLabel("Fitting Results"), self.window_fitting_hapi)
+
 
         # Creating canvas to plot fit and experimental data
         # Apply dark background style globally
@@ -483,16 +494,61 @@ class GUI(QMainWindow):
         self.generate1_button.clicked.connect(self.generate_lookuptable)
         input_layout.addRow(self.generate1_button)
     
-
-
         # Display the input group box
         input_group_box.setLayout(input_layout)
-        splitter.addWidget(input_group_box)
 
-        # Apply dark background style globally
-        plt.style.use('dark_background')
+        '''
+        # Group for sliders
+        sliders_group_box = QGroupBox("Plot Parameters")
+        sliders_layout = QFormLayout()
 
-        # Placeholder for the plot area
+        # Temperature slider with default range
+        self.temp_slider = QSlider(Qt.Horizontal)
+        self.temp_slider.setMinimum(300)  # Default minimum temperature
+        self.temp_slider.setMaximum(1000)  # Default maximum temperature
+        self.temp_slider.setValue(650)
+        self.temp_slider.setTickPosition(QSlider.TicksBelow)
+        self.temp_slider.setTickInterval(100)
+        sliders_layout.addRow(QLabel("Temperature (K):"), self.temp_slider)
+
+        # Mole Fraction slider with default range
+        self.mole_fraction_slider = QSlider(Qt.Horizontal)
+        self.mole_fraction_slider.setMinimum(0)  # Default minimum mole fraction
+        self.mole_fraction_slider.setMaximum(100)  # Represented as percentage
+        self.mole_fraction_slider.setValue(50)
+        self.mole_fraction_slider.setTickPosition(QSlider.TicksBelow)
+        self.mole_fraction_slider.setTickInterval(10)
+        sliders_layout.addRow(QLabel("Molar Fraction"), self.mole_fraction_slider)
+
+        # Connect input fields to dynamically update sliders
+        self.min_temp_input.textChanged.connect(self.update_sliders)
+        self.max_temp_input.textChanged.connect(self.update_sliders)
+        self.resolution_temp_input.textChanged.connect(self.update_sliders)
+        self.min_mole_fraction_input.textChanged.connect(self.update_sliders)
+        self.max_mole_fraction_input.textChanged.connect(self.update_sliders)
+        self.resolution_mole_fraction_input.textChanged.connect(self.update_sliders)
+
+
+        # Button to update the plot
+        self.update_plot_button = QPushButton("Update Plot")
+        self.update_plot_button.clicked.connect(self.update_plot)
+        sliders_layout.addRow(self.update_plot_button)
+
+        # Set layout for the sliders group box
+        sliders_group_box.setLayout(sliders_layout)
+        '''
+
+        # Layout to stack the input parameters and sliders group boxes vertically
+        input_and_sliders_layout = QVBoxLayout()
+        input_and_sliders_layout.addWidget(input_group_box)
+        #input_and_sliders_layout.addWidget(sliders_group_box) # TO DO
+
+        # Container widget for input and sliders
+        input_container = QFrame()
+        input_container.setLayout(input_and_sliders_layout)
+        splitter.addWidget(input_container)
+
+        # Matplotlib plot area
         self.lookup_plot_canvas = FigureCanvas(Figure())
         self.toolbar = NavigationToolbar(self.lookup_plot_canvas, self)
         plot_layout = QVBoxLayout()
@@ -507,6 +563,10 @@ class GUI(QMainWindow):
 
         # Set the main layout for the lookuptable tab
         self.lookuptable_tab.setLayout(main_layout)
+
+        # Connect sliders to the plotting function
+        #self.temp_slider.valueChanged.connect(self.update_plot)
+        #self.mole_fraction_slider.valueChanged.connect(self.update_plot)
 
     def generate_absorption_spectra(self):
         try:
@@ -612,7 +672,32 @@ class GUI(QMainWindow):
         create_lookup_table(params)
         self.update_progress("Successfully.")
 
+    def update_sliders(self):
+        try:
+            # Update temperature slider
+            min_temp = int(self.min_temp_input.text()) if self.min_temp_input.text() else 300
+            max_temp = int(self.max_temp_input.text()) if self.max_temp_input.text() else 3000
+            resolution_temp = int(self.resolution_temp_input.text()) if self.resolution_temp_input.text() else 100
+            self.temp_slider.setMinimum(min_temp)
+            self.temp_slider.setMaximum(max_temp)
+            self.temp_slider.setValue(min_temp)
+            self.temp_slider.setTickInterval(resolution_temp)
 
+            # Update mole fraction slider
+            min_mole_fraction = int(self.min_mole_fraction_input.text()) if self.min_mole_fraction_input.text() else 0
+            max_mole_fraction = int(self.max_mole_fraction_input.text()) if self.max_mole_fraction_input.text() else 100
+            resolution_mole_fraction = int(self.resolution_mole_fraction_input.text()) if self.resolution_mole_fraction_input.text() else 10
+            self.mole_fraction_slider.setMinimum(min_mole_fraction)
+            self.mole_fraction_slider.setMaximum(max_mole_fraction)
+            self.mole_fraction_slider.setValue(min_mole_fraction)
+            self.mole_fraction_slider.setTickInterval(resolution_mole_fraction)
+
+        except ValueError:
+            print("Invalid input for slider range. Please enter numeric values.")
+
+
+    def update_plot(self):
+        pass
 
     def fiting_data(self):
         pass    
