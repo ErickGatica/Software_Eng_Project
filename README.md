@@ -23,10 +23,12 @@ This is an assortment of software aimed towards making it easier to perform data
 - The Fitting Data page can be used to fit spectral data to absorption curves in the HITRAN database. Paths for input data, results, and linelists must be provided, as well as the names of the input data file, results file name, and plot name. The input data must be of the .cor file type.
 - The Lookup Table Generation page can be used to generate lookup tables of spectral absorption profiles for the inputted parameters.
 
-![alt text](image.png)
+![GUI](GUI.png)
 
 ### **Lookup Table Creation**
-- Feature 2
+- Lookup table generation can be performed in a separate python script ```h6py_lookuptABLE_NICO_gen.py``` as well as through the GUI. Running this script will create a csv file containing the lookup table created from hardcoded parameters defined in the load_parameters function.
+
+![lookup_table](lookup_table.png)
 
 
 ## **Installation**
