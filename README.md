@@ -1,26 +1,70 @@
-# Project
+# **Spectra Data Toolkit (SWE4S Group 10)**
 
-This is a Software with a friendly GUI for:
-- Generation of absorption spectroscopy data for all the listed molecules in HITRAN
-https://hitran.org/
-- Generation of lookuptables to speed up the process of experimental data fitting
-- Fitting thermodynamic properties of gases with experimental data of absorption spectroscopy 
-
-The software was developed by the next Ph.D. students from University of Colorado Boulder:
-- Nico Harris
-- Erick Gatica
-- Eric Richter
+This is an assortment of software aimed towards making it easier to perform data analysis of absorption spectroscopy data, particularly when it comes to dual-comb spectroscopy. This repository seeks to achieve the following:
+- Create a user-friendly GUI with which to interface with existing pldspectrapy fitting code
+- Enable the creation of pre-computed lookup tables of spectral absorption data for inputted molecules at various inputted parameters
+- Utilize these lookup tables to accelerate the fitting process of spectral absorption data
 
 
+## **Table of Contents**
+1. [Overview](#overview)
+2. [Features and Usage](#features)
+3. [Installation](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Steps](#installation)
+4. [Acknowledgments](#acknowledgments)
 
-# Introduction
+## **Features and Usage**
 
-This software is designed for the generation of absorption spectroscopy data, lookup table creation, and fitting of experimental data. Absorption spectroscopy is a powerful technique used to analyze the concentration of specific gases or molecules in a sample by measuring the absorption of light at different wavelengths. By passing light through a sample and detecting how much of that light is absorbed at particular wavelengths, researchers can identify and quantify the presence of various substances. This technique is widely used in fields ranging from environmental monitoring to chemical analysis and industrial applications.
+### **GUI**
 
-Developed at the Precision Laser Diagnostics Laboratory (PLDL) at the University of Colorado Boulder, this software aims to enhance the precision and efficiency of spectroscopic measurements. The PLDL specializes in cutting-edge research and development of laser-based diagnostics for energy and environmental applications, including combustion diagnostics, emissions detection, and gas sensing technologies.
+### **Lookup Table Creation**
+- Feature 2
+- Feature 3
 
-Our software is designed to be a flexible and user-friendly tool for the spectroscopy community, allowing users to generate synthetic absorption spectra, create lookup tables for various gases and conditions, and fit experimental data for accurate gas detection and quantification. By integrating advanced algorithms for data processing and signal fitting, this tool can significantly reduce the time and effort required for absorption spectroscopy experiments, making it a valuable resource for both researchers and industry professionals in the field.
+Include a screenshot or visual representation if possible.
 
 
-# Installation
+## **Installation**
 
+### **Prerequisites**
+- Python
+- [Conda](https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html)
+- Git
+- (Optional) PyCharm (or another IDE of your choice)
+
+### Steps
+
+1. Clone the repository and enter the directory:
+
+```bash
+git clone https://github.com/ErickGatica/Software_Eng_Project.git
+cd Software_Eng_Project
+```
+
+2. Create a conda environment from the `environment.yaml` file:
+
+```bash
+conda env create -f environment.yaml
+```
+_Note if you want to name this environment somethign different, you can use the 
+`--name` flag to overwrite the name in the environment file_
+
+If you've already created the environment and just want to update it, you can use the following command:
+
+```bash
+conda env update -f environment.yaml
+```
+
+This will create a new conda environment named `spectra_software_env` and install the 
+specified dependencies into it.
+
+3. Activate the conda environment:
+
+```bash
+conda activate spectra_software_env
+```
+
+## **Acknowledgments**
+
+The developers of this code with like to thank Eli Miller and Sean Coburn for helpful discussions.
