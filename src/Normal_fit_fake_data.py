@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.special import wofz  # Use Faddeeva function for Voigt profile
-
+#
 # Load the data from the CSV file
 input_file = 'methane_spectrum.csv'
 data = pd.read_csv(input_file)
