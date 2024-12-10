@@ -1,26 +1,19 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from scipy.special import erfc  # Import complementary error function from SciPy
-from hapi import *
+from scipy.special import wofz  # Use Faddeeva function for Voigt profile
 
-# Initialize HAPI
-db_begin('data')
+# Load the data from the CSV file
+input_file = 'methane_spectrum.csv'
+data = pd.read_csv(input_file)
+frequencies = data['Frequency'].values
+intensities = data['Intensity'].values
 
-# Define a fake methane dataset
-# Fake frequencies in cm^-1
-frequencies = np.linspace(3000, 3050, 500)
-# Simulated intensities (Voigt-like peaks)
-intensities = (
-    1.5 * np.exp(-0.5 * ((frequencies - 3015) / 1.2) ** 2) +
-    0.8 * np.exp(-0.5 * ((frequencies - 3030) / 0.8) ** 2) +
-    np.random.normal(0, 0.05, size=frequencies.shape)  # Add noise
-)
-
-# Define a Voigt function (simplified approximation for fitting)
+# Define a Voigt function using wofz
 def voigt_profile(f, amp, center, sigma, gamma):
     z = ((f - center) + 1j * gamma) / (sigma * np.sqrt(2))
-    return amp * np.real(np.exp(-z**2) * erfc(-1j * z)) / (sigma * np.sqrt(2 * np.pi))
+    return amp * np.real(wofz(z)) / (sigma * np.sqrt(2 * np.pi))
 
 # Function to fit multiple Voigt peaks
 def multi_voigt(f, *params):
