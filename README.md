@@ -50,9 +50,21 @@ cd Software_Eng_Project
 
 2. Create a conda environment from the `environment.yaml` file:
 
+Clone the repo using git:
+
+```bash
+git clone https://github.com/ErickGatica/Software_Eng_Project.git
+```
+
+
+# Environment
+
+To set the environment to work with this repo. In the folder where the repo was cloned:
+
 ```bash
 conda env create -f environment.yaml
 ```
+
 _Note if you want to name this environment somethign different, you can use the 
 `--name` flag to overwrite the name in the environment file_
 
@@ -74,3 +86,9 @@ conda activate spectra_software_env
 ## **Acknowledgments**
 
 The developers of this code with like to thank Eli Miller and Sean Coburn for helpful discussions.
+
+Then, activate the environment:
+
+```bash 
+conda activate spectra_data_generator
+```
