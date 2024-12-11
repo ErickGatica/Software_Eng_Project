@@ -740,7 +740,7 @@ class GUI(QMainWindow):
             "spectral_shift": float(self.shift_range_input.text()),
             "fit_start": float(self.min_wavenumber_input.text()),
             "fit_end": float(self.max_wavenumber_input.text()),
-            "wavenumber_array": np.linspace(float(self.min_wavenumber_input.text()), float(self.max_wavenumber_input.text()), float(self.resolution_wavenumber_input.text())),
+            "wavenumber_array": np.linspace(float(self.min_wavenumber_input.text()), float(self.max_wavenumber_input.text()), int(self.resolution_wavenumber_input.text())),
             "output_csv_file": self.csv_name_input.text(),
         }
         
@@ -851,6 +851,9 @@ class GUI(QMainWindow):
         pass    
 
     def fit_data_hapi(self):
+        '''
+        Function to to the fiting of data as we do
+        '''
         # Creating the array with the initial guess to use curve_fit function
         initial_guess = [float(i) for i in self.initial_guess_input.text().split(",")]
         # Getting the data from the file
@@ -876,8 +879,3 @@ class GUI(QMainWindow):
         # Once is done, print the results in the window for the fitting and peaks
         self.window_fitting_hapi.setText(f"Peaks: {popt}")     
 
-# Run the application
-app = QApplication(sys.argv)
-window = GUI()
-window.show()
-sys.exit(app.exec_())
