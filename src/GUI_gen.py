@@ -873,9 +873,8 @@ class GUI(QMainWindow):
 
 
         
-        # Once its done print Successfully in the window
-        self.window_fitting_hapi.setText("Successfully.")
-        
+        # Once is done, print the results in the window for the fitting and peaks
+        self.window_fitting_hapi.setText(f"Peaks: {popt}")     
 
 # Run the application
 app = QApplication(sys.argv)
