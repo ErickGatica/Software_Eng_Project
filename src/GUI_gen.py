@@ -190,6 +190,10 @@ class GUI(QMainWindow):
         # Apply dark background style globally
         plt.style.use('dark_background')
 
+        # Checkbox to enable or disable saving data of absorption in text file
+        self.save_data_checkbox = QCheckBox("Save Generated Data in text file")
+        input_layout.addRow(self.save_data_checkbox)
+
 
         # Generate button
         self.generate_button = QPushButton("Generate Absorption Spectra")
@@ -614,6 +618,10 @@ class GUI(QMainWindow):
             self.absorption_plot_canvas.draw()
             print("Generating absorption spectra...")
 
+            # Saving the data in text file if the checkbox is checked
+            if self.save_data_checkbox.isChecked():
+                self.save_data(data)
+        
         except ValueError as e:
             QMessageBox.critical(self, "Input Error", f"Invalid input: {e}")
         except Exception as e:
@@ -688,16 +696,18 @@ class GUI(QMainWindow):
     def save_data(self, data):
         '''
         Save the absorption data of the plot in a text file
+        every time the checkbox is checked
         '''
         nu = data.nu
         absorption = data.absorption
-        label = str(data.molecule) + "_" + str(data.isotopologue) + "_" + str(data.T) + "_" + str(data.P) + "_" + str(data.molar) + "_" + str(data.length) + "_" + str(data.method) 
-        with open("absorption_data.txt", "w") as f:
+        # Label using data class and input of molar fraction in GUI
+        label = str(data.molecule) + "_" + str(data.temper) + "K_" + str(data.pressure) + "atm_" + str(self.molar_fraction_input.text()) + "MF"
+        # Creating the text file with the absorption data and saving it in the folder
+        with open(f"absorption_data_{label}.txt", "w") as file:
+            file.write("Wavenumber (cm-1), Absorption\n")
             for i in range(len(nu)):
-                if i == 1:
-                    f.write(f"labels\t{label}\n")
-                else:
-                    f.write(f"{nu[i]}\t{absorption[i]}\n")
+                file.write(f"{nu[i]}, {absorption[i]}\n")
+        
 
     def update_progress(self, message):
         '''
