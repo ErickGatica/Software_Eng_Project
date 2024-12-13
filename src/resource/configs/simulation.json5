@@ -1,0 +1,38 @@
+{
+    input: {
+        plot: true,
+        save: true,
+        plot_path: "C:/plots",
+        plot_name: "simulation_plot.png",
+        save_path: "C:/output",
+        save_name: "simulation_output.csv",
+    },
+    model_setup: {
+        H2O: {
+            pressure: 0.85,
+            temperature: 300,
+            pathlength: 2e5,
+            molefraction: 0.01,
+            molecule_id: 1,
+            isotope: 1,
+            linelist_path: "C:\\git\\linelists_CH4",
+            database_name: "H2O",
+            simulation_range: [6007,6155],
+            simulation_resolution: 200e6,
+            simulation_backend: "hapi",
+        },
+        CH4: {
+            pressure: 0.85,
+            temperature: 300,
+            pathlength: 2e5,
+            molefraction: 5e-6,
+            molecule_id: 6,
+            isotope: 1,
+            linelist_path: "C:\\git\\linelists_CH4",
+            database_name: "CH4_HIT08",
+            simulation_range: [6007,6155],
+            simulation_resolution: 200e6,
+            simulation_backend: "hapi"
+        },
+    },
+}

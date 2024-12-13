@@ -19,12 +19,16 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from scipy.optimize import curve_fit
 # Importing the functions from the Abs_gen.py script
 from Abs_gen import spectrum, plot_spectra
 
 # Importing funtion to generate Lookuptable
 from h6py_lookuptABLE_NICO_gen import create_lookup_table
-
+from Normie_fitting import configure_plots, load_configuration, initialize_hapi_db
+from Normie_fitting import process_file, plot_results
+from Normal_fit_data import voigt_profile, multi_voigt 
 # Importing the variables from the Variables.py script
 # from Variables import args
 # from Variables import args_dict
@@ -69,6 +73,9 @@ class GUI(QMainWindow):
         self.create_menu()
 
     def create_menu(self):
+        '''
+        Create a menu bar with options to zoom the plot
+        '''
         menubar = self.menuBar()
         viewMenu = menubar.addMenu('View')
 
@@ -77,9 +84,15 @@ class GUI(QMainWindow):
         viewMenu.addAction(zoom_action)
 
     def zoom_plot(self):
+        '''
+        Call the zoom function of the toolbar to enable zooming in the plot
+        '''
         self.toolbar.zoom()
 
     def init_absorption_tab(self):
+        '''
+        Initialize the layout for the absorption spectra tab
+        '''
         main_layout = QVBoxLayout()
 
         # Description and logo layout
@@ -177,6 +190,10 @@ class GUI(QMainWindow):
         # Apply dark background style globally
         plt.style.use('dark_background')
 
+        # Checkbox to enable or disable saving data of absorption in text file
+        self.save_data_checkbox = QCheckBox("Save Generated Data in text file")
+        input_layout.addRow(self.save_data_checkbox)
+
 
         # Generate button
         self.generate_button = QPushButton("Generate Absorption Spectra")
@@ -189,10 +206,12 @@ class GUI(QMainWindow):
         input_layout.addRow(self.clear_button)
 
         # Save button
+        '''
         self.save_button = QPushButton("Save Data")
         self.save_button.clicked.connect(self.save_data)
         input_layout.addRow(self.save_button)
-
+        '''
+        
         input_group_box.setLayout(input_layout)
         splitter.addWidget(input_group_box)
 
@@ -211,18 +230,23 @@ class GUI(QMainWindow):
         self.absorption_tab.setLayout(main_layout)
 
     def init_fitting_tab(self):
+        '''
+        Initialize the layout for the fitting tab
+        '''
         # Create the main layout for the fitting tab
-        main_layout = QVBoxLayout()
+        main_layout = QHBoxLayout()  # Horizontal layout to place inputs and plot side by side
 
         # Create a splitter for resizable input and plot areas
         splitter = QSplitter(Qt.Horizontal)
 
-        # Group for inputs
-        input_group_box = QGroupBox("Input Parameters")
-        input_layout = QFormLayout()
-
         # Set a fixed width for the input boxes
         input_width = 200
+
+        # TODO : Integration lookup table fitting
+        '''
+        # Group for input parameters
+        input_group_box = QGroupBox("Lookuptable Fitting")
+        input_layout = QFormLayout()
 
         # Data path
         self.data_path_input = QLineEdit()
@@ -278,93 +302,67 @@ class GUI(QMainWindow):
         # Fitting button
         self.fitting_button = QPushButton("Fit Data Lookuptable")
         input_layout.addRow(self.fitting_button)
-
-        # Display the input group box
-        input_group_box.setLayout(input_layout)
         self.fitting_button.clicked.connect(self.fiting_data)
-        splitter.addWidget(input_group_box)
 
-        # Adding window to displayed the parameters of the fitting that were obtained
+        # Window to display fitting progress
         self.window_fitting = QLineEdit()
         self.window_fitting.setReadOnly(True)
         input_layout.addRow(QLabel("Fitting Progress"), self.window_fitting)
 
-        # Group for fitting progress inputs
-        fitting_progress_group_box = QGroupBox("Fitting Results")
+        # Set layout for input group box
+        input_group_box.setLayout(input_layout)
+        '''
+        # Group for fitting results
+        fitting_progress_group_box = QGroupBox("Normal Fitting")
         fitting_progress_layout = QFormLayout()
 
-        # Data path
+        # Data path for experimental data
         self.data_path_input_fp = QLineEdit()
         self.data_path_input_fp.setFixedWidth(input_width)
         self.data_path_label_fp = QLabel("Data Path")
         self.data_path_button_fp = QPushButton("Browse")
-        self.data_path_button_fp.clicked.connect(lambda: self.browse_folder(self.data_path_input_fp))
+        self.data_path_button_fp.clicked.connect(lambda: self.browse_file(self.data_path_input_fp))
         data_path_layout_fp = QHBoxLayout()
         data_path_layout_fp.addWidget(self.data_path_input_fp)
         data_path_layout_fp.addWidget(self.data_path_button_fp)
         fitting_progress_layout.addRow(self.data_path_label_fp, data_path_layout_fp)
 
-        # Filename
-        self.filename_input_fp = QLineEdit()
-        self.filename_input_fp.setFixedWidth(input_width)
-        self.filename_label_fp = QLabel("Filename")
-        fitting_progress_layout.addRow(self.filename_label_fp, self.filename_input_fp)
-
-        # Results path
-        self.results_path_input_fp = QLineEdit()
-        self.results_path_input_fp.setFixedWidth(input_width)
-        self.results_path_label_fp = QLabel("Results Path")
-        self.results_path_button_fp = QPushButton("Browse")
-        self.results_path_button_fp.clicked.connect(lambda: self.browse_folder(self.results_path_input_fp))
-        results_path_layout_fp = QHBoxLayout()
-        results_path_layout_fp.addWidget(self.results_path_input_fp)
-        results_path_layout_fp.addWidget(self.results_path_button_fp)
-        fitting_progress_layout.addRow(self.results_path_label_fp, results_path_layout_fp)
-
-        # Results filename
-        self.results_filename_input_fp = QLineEdit()
-        self.results_filename_input_fp.setFixedWidth(input_width)
-        self.results_filename_label_fp = QLabel("Results Filename")
-        fitting_progress_layout.addRow(self.results_filename_label_fp, self.results_filename_input_fp)
-
-        # Plot name
-        self.plot_name_input_fp = QLineEdit()
-        self.plot_name_input_fp.setFixedWidth(input_width)
-        self.plot_name_label_fp = QLabel("Plot Name")
-        fitting_progress_layout.addRow(self.plot_name_label_fp, self.plot_name_input_fp)
-
-        # Linelist path
-        self.linelist_path_input_fp = QLineEdit()
-        self.linelist_path_input_fp.setFixedWidth(input_width)
-        self.linelist_path_label_fp = QLabel("Linelist Path")
-        self.linelist_path_button_fp = QPushButton("Browse")
-        self.linelist_path_button_fp.clicked.connect(lambda: self.browse_folder(self.linelist_path_input_fp))
-        linelist_path_layout_fp = QHBoxLayout()
-        linelist_path_layout_fp.addWidget(self.linelist_path_input_fp)
-        linelist_path_layout_fp.addWidget(self.linelist_path_button_fp)
-        fitting_progress_layout.addRow(self.linelist_path_label_fp, linelist_path_layout_fp)
+        # Inputs for initial guess
+        self.initial_guess_input = QLineEdit()
+        self.initial_guess_input.setFixedWidth(input_width)
+        self.initial_guess_label = QLabel("Initial Guess, N peak: ampi, centeri, sigmai, gammai, i = 1, N")
+        fitting_progress_layout.addRow(self.initial_guess_label, self.initial_guess_input)
 
         # Fitting progress button
-        self.fitting_progress_button = QPushButton("Fit Data HAPI")
+        self.fitting_progress_button = QPushButton("Fit Data")
         fitting_progress_layout.addRow(self.fitting_progress_button)
-
-        # Display the fitting progress group box
-        fitting_progress_group_box.setLayout(fitting_progress_layout)
         self.fitting_progress_button.clicked.connect(self.fit_data_hapi)
-        splitter.addWidget(fitting_progress_group_box)
 
-        # Adding window to displayed the parameters of the fitting that were obtained
+        # Window to display fitting results
         self.window_fitting_hapi = QLineEdit()
         self.window_fitting_hapi.setReadOnly(True)
         fitting_progress_layout.addRow(QLabel("Fitting Results"), self.window_fitting_hapi)
 
+        # Clear button
+        self.clear_button_fp = QPushButton("Clear Plot")  
+        fitting_progress_layout.addRow(self.clear_button_fp)
+        self.clear_button_fp.clicked.connect(self.clear_plot_fitting)
 
-        # Creating canvas to plot fit and experimental data
-        # Apply dark background style globally
-        plt.style.use('dark_background')
+        # Set layout for fitting progress group box
+        fitting_progress_group_box.setLayout(fitting_progress_layout)
 
-        '''
-        # Placeholder for the plot area
+        # Create a vertical layout to stack both group boxes
+        input_fitting_layout = QVBoxLayout()
+        #input_fitting_layout.addWidget(input_group_box) # Reactivate with lookup
+        input_fitting_layout.addWidget(fitting_progress_group_box)
+
+        # Create a container for the left panel and add it to the splitter
+        input_fitting_frame = QFrame()
+        input_fitting_frame.setLayout(input_fitting_layout)
+        splitter.addWidget(input_fitting_frame)
+
+        # Plot area
+        plt.style.use('dark_background')  # Apply dark background style globally
         self.fitting_plot_canvas = FigureCanvas(Figure())
         self.toolbar = NavigationToolbar(self.fitting_plot_canvas, self)
         plot_layout = QVBoxLayout()
@@ -373,17 +371,20 @@ class GUI(QMainWindow):
         plot_frame = QFrame()
         plot_frame.setLayout(plot_layout)
         splitter.addWidget(plot_frame)
-        '''
+
         # Add the splitter to the main layout
         main_layout.addWidget(splitter)
-        
 
         # Set the main layout for the fitting tab
         self.fitting_tab.setLayout(main_layout)
 
 
 
+
     def init_lookuptable_tab(self):
+        '''
+        Initialize the layout for the lookuptable generation tab
+        '''
         # Create the main layout for the lookuptable tab
         main_layout = QVBoxLayout()
 
@@ -497,10 +498,21 @@ class GUI(QMainWindow):
         # Display the input group box
         input_group_box.setLayout(input_layout)
 
-        '''
+        
         # Group for sliders
         sliders_group_box = QGroupBox("Plot Parameters")
         sliders_layout = QFormLayout()
+
+        # Getting path of lookuptable file with browser function and button
+        self.lookuptable_path_input = QLineEdit()
+        self.lookuptable_path_input.setFixedWidth(input_width)
+        self.lookuptable_path_label = QLabel("Lookuptable Path")
+        self.lookuptable_path_button = QPushButton("Browse")
+        self.lookuptable_path_button.clicked.connect(lambda: self.browse_file(self.lookuptable_path_input))
+        lookuptable_path_layout = QHBoxLayout()
+        lookuptable_path_layout.addWidget(self.lookuptable_path_input)
+        lookuptable_path_layout.addWidget(self.lookuptable_path_button)
+        sliders_layout.addRow(self.lookuptable_path_label, lookuptable_path_layout)
 
         # Temperature slider with default range
         self.temp_slider = QSlider(Qt.Horizontal)
@@ -531,17 +543,23 @@ class GUI(QMainWindow):
 
         # Button to update the plot
         self.update_plot_button = QPushButton("Update Plot")
-        self.update_plot_button.clicked.connect(self.update_plot)
+        self.update_plot_button.clicked.connect(self.plot_lookuptable)
         sliders_layout.addRow(self.update_plot_button)
+
+        # Button to clear the plot
+        self.clear_plot_button = QPushButton("Clear Plot")
+        self.clear_plot_button.clicked.connect(self.clear_plot_lookuptable)
+        sliders_layout.addRow(self.clear_plot_button)
+
 
         # Set layout for the sliders group box
         sliders_group_box.setLayout(sliders_layout)
-        '''
+        
 
         # Layout to stack the input parameters and sliders group boxes vertically
         input_and_sliders_layout = QVBoxLayout()
         input_and_sliders_layout.addWidget(input_group_box)
-        #input_and_sliders_layout.addWidget(sliders_group_box) # TO DO
+        input_and_sliders_layout.addWidget(sliders_group_box) # TO DO
 
         # Container widget for input and sliders
         input_container = QFrame()
@@ -569,6 +587,9 @@ class GUI(QMainWindow):
         #self.mole_fraction_slider.valueChanged.connect(self.update_plot)
 
     def generate_absorption_spectra(self):
+        '''
+        Generate the absorption spectra based on the input parameters
+        '''
         try:
             molecule = self.molecule_input.currentText()
             # Molecule Id and isotopologue have to be a number
@@ -597,6 +618,10 @@ class GUI(QMainWindow):
             self.absorption_plot_canvas.draw()
             print("Generating absorption spectra...")
 
+            # Saving the data in text file if the checkbox is checked
+            if self.save_data_checkbox.isChecked():
+                self.save_data(data)
+        
         except ValueError as e:
             QMessageBox.critical(self, "Input Error", f"Invalid input: {e}")
         except Exception as e:
@@ -606,6 +631,9 @@ class GUI(QMainWindow):
         return data
 
     def validate_input(self, input_field, field_name):
+        '''
+        Validate the input field and convert it to a float
+        '''
         value = input_field.text()
         print(f"Validating {field_name}: '{value}'")  # Debug statement
         if not value:
@@ -616,33 +644,82 @@ class GUI(QMainWindow):
             raise ValueError(f"{field_name} must be a valid number.")
 
     def clear_plot(self):
+        '''
+        Clear the plot area
+        '''
         ax = self.absorption_plot_canvas.figure.gca()
         ax.clear()
         self.absorption_plot_canvas.draw()
         print("Plot cleared.")
     
+    def clear_plot_fitting(self):
+        '''
+        Clear the plot area
+        '''
+        ax = self.fitting_plot_canvas.figure.gca()
+        ax.clear()
+        self.fitting_plot_canvas.draw()
+        print("Plot cleared.")
+    
+    def clear_plot_lookuptable(self): 
+        '''
+        Clear the plot area
+        '''
+        ax = self.lookup_plot_canvas.figure.gca()
+        ax.clear()
+        self.lookup_plot_canvas.draw()
+        print("Plot cleared.")
+
     def browse_folder(self, target_input):
+        '''
+        Browse for a folder and set the path in the target input field
+        
+        Inputs:
+            target_input (QLineEdit): Input field to set the folder path
+        '''
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder_path:
             target_input.setText(folder_path)
+    
+    def browse_file(self, target_input):
+        '''
+        Browse for a file and set the path in the target input field
+        
+        Inputs:
+            target_input (QLineEdit): Input field to set the file path  
+        '''
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select File")
+        if file_path:
+            target_input.setText(file_path)
 
     # Function to save the absorption data of the plot in a text file
     def save_data(self, data):
+        '''
+        Save the absorption data of the plot in a text file
+        every time the checkbox is checked
+        '''
         nu = data.nu
         absorption = data.absorption
-        label = str(data.molecule) + "_" + str(data.isotopologue) + "_" + str(data.T) + "_" + str(data.P) + "_" + str(data.molar) + "_" + str(data.length) + "_" + str(data.method) 
-        with open("absorption_data.txt", "w") as f:
+        # Label using data class and input of molar fraction in GUI
+        label = str(data.molecule) + "_" + str(data.temper) + "K_" + str(data.pressure) + "atm_" + str(self.molar_fraction_input.text()) + "MF"
+        # Creating the text file with the absorption data and saving it in the folder
+        with open(f"absorption_data_{label}.txt", "w") as file:
+            file.write("Wavenumber (cm-1), Absorption\n")
             for i in range(len(nu)):
-                if i == 1:
-                    f.write(f"labels\t{label}\n")
-                else:
-                    f.write(f"{nu[i]}\t{absorption[i]}\n")
+                file.write(f"{nu[i]}, {absorption[i]}\n")
+        
 
     def update_progress(self, message):
+        '''
+        Update the progress window with a message
+        '''
         self.progress_window.setText(message)
 
 
     def generate_lookuptable(self):
+        '''
+        Function to generate the lookuptable for the absorption spectra of the molecules
+        '''
         # Creating dictionary with the parameters that create_lookup_table needs
         params ={
             "molecule_name": self.molecule1_lookup_input.currentText(),
@@ -663,7 +740,7 @@ class GUI(QMainWindow):
             "spectral_shift": float(self.shift_range_input.text()),
             "fit_start": float(self.min_wavenumber_input.text()),
             "fit_end": float(self.max_wavenumber_input.text()),
-            "wavenumber_array": np.linspace(float(self.min_wavenumber_input.text()), float(self.max_wavenumber_input.text()), 500),
+            "wavenumber_array": np.linspace(float(self.min_wavenumber_input.text()), float(self.max_wavenumber_input.text()), int(self.resolution_wavenumber_input.text())),
             "output_csv_file": self.csv_name_input.text(),
         }
         
@@ -673,6 +750,9 @@ class GUI(QMainWindow):
         self.update_progress("Successfully.")
 
     def update_sliders(self):
+        '''
+        Update the sliders based on the input values
+        '''
         try:
             # Update temperature slider
             min_temp = int(self.min_temp_input.text()) if self.min_temp_input.text() else 300
@@ -694,7 +774,75 @@ class GUI(QMainWindow):
 
         except ValueError:
             print("Invalid input for slider range. Please enter numeric values.")
+    
+    def plot_lookuptable(self):
+        """
+        Plot the lookup table based on the selected temperature and mole fraction
+        """
+        # Read the data from the input file
+        data = pd.read_csv(self.lookuptable_path_input.text())
 
+        # Extract relevant columns
+        wavenumber = data['Wavenumber (cm⁻¹)'].values
+        absorption = data['Absorption Coefficient'].values
+        mole_fraction = data['Mole Fraction'].values
+        temperature = data['Temperature (K)'].values
+
+        # Update slider range inputs based on unique values in the data
+        unique_temps = sorted(set(temperature))
+        unique_mole_fractions = sorted(set(mole_fraction))
+
+        self.min_temp_input.setText(str(min(unique_temps)))
+        self.max_temp_input.setText(str(max(unique_temps)))
+        self.resolution_temp_input.setText(str(len(unique_temps)))
+
+        self.min_mole_fraction_input.setText(str(min(unique_mole_fractions)))
+        self.max_mole_fraction_input.setText(str(max(unique_mole_fractions)))
+        self.resolution_mole_fraction_input.setText(str(len(unique_mole_fractions)))
+
+        # Update sliders with appropriate ranges
+        self.temp_slider.setMinimum(0)
+        self.temp_slider.setMaximum(len(unique_temps) - 1)
+        self.temp_slider.setSingleStep(1)
+
+        self.mole_fraction_slider.setMinimum(0)
+        self.mole_fraction_slider.setMaximum(len(unique_mole_fractions) - 1)
+        self.mole_fraction_slider.setSingleStep(1)
+
+        # Get current slider positions and corresponding temperature and mole fraction
+        temp_index = self.temp_slider.value()
+        mole_fraction_index = self.mole_fraction_slider.value()
+        selected_temp = unique_temps[temp_index]
+        selected_mole_fraction = unique_mole_fractions[mole_fraction_index]
+
+        # Filter data for the selected temperature and mole fraction
+        mask = (temperature == selected_temp) & (mole_fraction == selected_mole_fraction)
+
+        # Clear previous plots
+        ax = self.lookup_plot_canvas.figure.gca()
+        ax.clear()
+
+        # Plot the filtered data
+        if mask.any():
+            ax.plot(
+                wavenumber[mask],
+                absorption[mask],
+                label=f"T: {selected_temp} K, Mole Fraction: {selected_mole_fraction}"
+            )
+            ax.set_xlabel("Wavenumber (cm⁻¹)")
+            ax.set_ylabel("Absorption Coefficient")
+            ax.legend()
+        else:
+            ax.text(
+                0.5, 0.5,
+                "No data available for the selected parameters",
+                transform=ax.transAxes,
+                ha='center', va='center'
+            )
+
+        # Apply tight layout and redraw the canvas
+        self.lookup_plot_canvas.figure.tight_layout()
+        self.lookup_plot_canvas.draw()
 
     def update_plot(self):
         pass
@@ -703,10 +851,31 @@ class GUI(QMainWindow):
         pass    
 
     def fit_data_hapi(self):
-        pass
+        '''
+        Function to to the fiting of data as we do
+        '''
+        # Creating the array with the initial guess to use curve_fit function
+        initial_guess = [float(i) for i in self.initial_guess_input.text().split(",")]
+        # Getting the data from the file
+        data_path = self.data_path_input_fp.text()
+        data = pd.read_csv(data_path)
+        frequencies = data['Frequency'].values
+        intensities = data['Intensity'].values
+        # Fit the data
+        popt, pcov = curve_fit(multi_voigt, frequencies, intensities, p0=initial_guess)
+        
+        # Plot the results in the canvas of the tab
+        ax = self.fitting_plot_canvas.figure.gca()
+        ax.plot(frequencies, intensities, label="Experimental Data")
+        ax.plot(frequencies, multi_voigt(frequencies, *popt), label="Fitted Data", linewidth=2)
+        ax.set_xlabel("Wavenumber (cm⁻¹)")
+        ax.set_ylabel("Absorption Coefficient")
+        ax.legend()
+        self.fitting_plot_canvas.figure.tight_layout()
+        self.fitting_plot_canvas.draw()
 
-# Run the application
-app = QApplication(sys.argv)
-window = GUI()
-window.show()
-sys.exit(app.exec_())
+
+        
+        # Once is done, print the results in the window for the fitting and peaks
+        self.window_fitting_hapi.setText(f"Peaks: {popt}")     
+

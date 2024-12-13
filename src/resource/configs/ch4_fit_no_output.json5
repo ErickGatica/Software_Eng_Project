@@ -1,0 +1,34 @@
+{
+    input: {
+        data_path: "examples/data_methane",
+        filename: "20240205170949",
+        process_raw: false,
+        linelist_path: "resource/linelists",
+        fit_plots: false,
+        save_plot: false,
+        plot_path: "examples/output",
+        plot_name: "ch4_fit_plot",
+        save_results: true,
+        results_path: "examples/output",
+        results_name: "ch4_fit_output.txt",
+    },
+    fitting: {
+        band_fit: [6007, 6155, ],
+        baseline: 120,
+        etalons: [[250, 320, ], ],
+        lock_frequency: 32000000.0,
+        simulation_backend: "hapi",
+    },
+    model_setup: {
+        ch4: {
+            pressure: {value: 0.92, vary: false, min: 0.1, max: 1, },
+            temperature: {value: 305, vary: false, min: 200, max: 350, },
+            molefraction: {value: 0.05, vary: true, min: 0, max: 1, },
+            pathlength: {value: 10, vary: false, },
+            shift: {value: 0, vary: false, min: -0.2, max: 0.2, },
+            mol_id: {value: 6, vary: false, },
+            iso: {value: 1, vary: false, },
+            db_name: "CH4_HIT08"
+        },
+    },
+}

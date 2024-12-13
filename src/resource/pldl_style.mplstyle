@@ -1,0 +1,43 @@
+axes.titlesize : 24
+axes.labelsize : 20
+lines.linewidth : 1.5
+lines.markersize : 10
+xtick.labelsize : 16
+ytick.labelsize : 16
+xtick.direction : in
+ytick.direction : in
+xtick.minor.visible : True
+ytick.minor.visible : True
+xtick.major.size : 6
+ytick.major.size : 6
+xtick.minor.size : 3
+ytick.minor.size : 3
+xtick.major.width : 1.5
+ytick.major.width : 1.5
+xtick.minor.width : 1.0
+ytick.minor.width : 1.0
+
+# Allow the fonts to be edited as fonts in export
+pdf.fonttype : 42
+ps.fonttype : 42
+
+#change the default plot size
+figure.figsize : 10, 8
+
+#Reduce the default subplot whitespace
+figure.subplot.left : 0.1
+figure.subplot.right : 0.9
+figure.subplot.bottom : 0.1
+figure.subplot.top : 0.9
+figure.subplot.wspace : 0.2
+figure.subplot.hspace : 0.2
+
+
+# Change fonts
+font.family : serif
+font.serif : Times New Roman
+font.size : 16
+
+
+# Custom color cycle
+axes.prop_cycle: cycler('color', ['011959', 'f19d6b','4d734d', 'faccfa','938737','226061','c09036','fdb4b4'])

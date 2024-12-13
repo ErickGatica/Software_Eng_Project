@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd  # To save data as CSV
 import os
 
-# Generate a fake methane dataset
+# Generate a methane dataset for validation of tools
 frequencies = np.linspace(3000, 3050, 500)
 intensities = (
     1.5 * np.exp(-0.5 * ((frequencies - 3015) / 1.2) ** 2) +
