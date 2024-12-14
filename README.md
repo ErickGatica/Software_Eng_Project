@@ -25,32 +25,32 @@ This is an assortment of software aimed towards making it easier to perform data
 
 ### Spectra generation tab
 
-This tab allow to you to generate the spectra data for different molecules and conditions. Besides, the GUI will save the generated data in a text file if the checkbox is checked. The text file include the wavenumber for the specified range and the absorption for the set conditions. The file text is saved in the same folder where the GUI is running.
+This tab allows you to generate spectra data for different molecules and conditions. The GUI will save the generated data in a text file if the checkbox is checked. The text file includes the wavenumber for the specified range and the absorption for the set conditions. The file text is saved in the same folder where the GUI is running.
 
-![GUI](GUI.png)
+![GUI](images/GUI.png)
 
 ### Fitting tab
 
-The fitting tab allow you to fit experimental data using a normal fit. Future developments will include a better interface for the input of parameters and the total integration of the lookuptables.
+The fitting tab allows you to fit experimental data using a normal fit. Future developments will include a better interface for the input of parameters and the total integration of the lookuptables.
 
-![Fitting](Fitting.png)
+![Fitting](images/Fitting.png)
 
 ### Lookuptable generation 
 
-This tab generates the lookuptable for different molecules at specified conditions. Besides includes a interface to check the lookuptable that is generated. The lookuptable is a file that is saved in the same folder where the GUI is running.
+This tab generates the lookuptable for different molecules at specified conditions. It also includes an interface to check the lookuptable that is generated. The lookuptable is a file that is saved in the same folder where the GUI is running.
 
-![Lookup generation](Looukuptable.png)
+![Lookup generation](images/Looukuptable.png)
 
 ### Tutorial
 
-To help the user to understand how the GUI works in the next video you can find a guide step by step to use the interface:
+To help the user understand how the GUI works, the video below shows a step by step guide on how to use the interface:
 
 https://youtu.be/2R2gXJm2mUI
 
 ### **Lookup Table Creation**
 - Lookup table generation can be performed in a separate python script ```h6py_lookuptABLE_NICO_gen.py``` as well as through the GUI. Running this script will create a csv file containing the lookup table created from hardcoded parameters defined in the load_parameters function.
 
-![lookup_table](lookup_table.png)
+![lookup_table](images/lookup_table.png)
 
 
 ## **Installation**
@@ -108,9 +108,3 @@ conda activate spectra_software_env
 ## **Acknowledgments**
 
 The developers of this code with like to thank Eli Miller and Sean Coburn for helpful discussions.
-
-Then, activate the environment:
-
-```bash 
-conda activate spectra_data_generator
-```
