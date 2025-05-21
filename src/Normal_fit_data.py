@@ -30,7 +30,7 @@ initial_guess = [
     0.8, 3030, 0.8, 0.5   # Second peak
 ]
 
-# Debugging purposes
+# Debugging purposes to send
 
 '''
 # Fit the data
